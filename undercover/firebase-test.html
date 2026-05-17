@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase 連接測試</title>
+<style>
+body {
+  font-family: -apple-system, sans-serif;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #0f0f13;
+  color: #f0f0f5;
+}
+.test-box {
+  background: #1a1a24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.status {
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  font-weight: 600;
+}
+.success { background: rgba(34,197,94,0.2); color: #22c55e; }
+.error { background: rgba(239,68,68,0.2); color: #ef4444; }
+.info { background: rgba(124,58,237,0.2); color: #9d5cf6; }
+button {
+  background: #7c3aed;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 5px;
+}
+button:hover { background: #9d5cf6; }
+pre {
+  background: #0a0a0f;
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+<h1>🔥 Firebase 連接測試工具</h1>
+<p>這個頁面會測試你的 Firebase 配置是否正確</p>
+
+<div class="test-box">
+  <h2>測試 1: Firebase SDK 加載</h2>
+  <div id="test1-result">等待測試...</div>
+</div>
+
+<div class="test-box">
+  <h2>測試 2: Firebase 初始化</h2>
+  <div id="test2-result">等待測試...</div>
+</div>
+
+<div class="test-box">
+  <h2>測試 3: 讀取權限測試</h2>
+  <button onclick="testRead()">測試讀取</button>
+  <div id="test3-result"></div>
+</div>
+
+<div class="test-box">
+  <h2>測試 4: 寫入權限測試</h2>
+  <button onclick="testWrite()">測試寫入</button>
+  <div id="test4-result"></div>
+</div>
+
+<div class="test-box">
+  <h2>測試 5: 房間創建測試</h2>
+  <button onclick="testCreateRoom()">創建測試房間</button>
+  <div id="test5-result"></div>
+</div>
+
+<div class="test-box">
+  <h2>控制台日誌</h2>
+  <div id="console-log" style="max-height: 300px; overflow-y: auto;"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const consoleLog = document.getElementById('console-log');
+function log(msg, type = 'info') {
+  const div = document.createElement('div');
+  div.className = `status ${type}`;
+  div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  consoleLog.appendChild(div);
+  consoleLog.scrollTop = consoleLog.scrollHeight;
+  console.log(msg);
+}
+
+// Test 1: SDK Loading
+try {
+  if (typeof firebase !== 'undefined') {
+    document.getElementById('test1-result').innerHTML = '<div class="status success">✓ Firebase SDK 已成功加載</div>';
+    log('Firebase SDK 加載成功', 'success');
+  } else {
+    throw new Error('Firebase SDK 未定義');
+  }
+} catch (err) {
+  document.getElementById('test1-result').innerHTML = `<div class="status error">✗ ${err.message}</div>`;
+  log('Firebase SDK 加載失敗: ' + err.message, 'error');
+}
+
+// Test 2: Firebase Initialization
+const firebaseConfig = {
+  apiKey: "AIzaSyD75zDy0mhq7IvL_z3xI3oXFtDn76FK9bY",
+  authDomain: "undercover-e8c2d.firebaseapp.com",
+  databaseURL: "https://undercover-e8c2d-default-rtdb.firebaseio.com",
+  projectId: "undercover-e8c2d",
+  storageBucket: "undercover-e8c2d.firebasestorage.app",
+  messagingSenderId: "609159439247",
+  appId: "1:609159439247:web:5aa0c580b698a83b3d21fa"
+};
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  document.getElementById('test2-result').innerHTML = '<div class="status success">✓ Firebase 初始化成功</div><pre>' + JSON.stringify(firebaseConfig, null, 2) + '</pre>';
+  log('Firebase 初始化成功', 'success');
+  
+  // Make db global for tests
+  window.testDb = db;
+} catch (err) {
+  document.getElementById('test2-result').innerHTML = `<div class="status error">✗ ${err.message}</div>`;
+  log('Firebase 初始化失敗: ' + err.message, 'error');
+}
+
+// Test 3: Read Permission
+async function testRead() {
+  const result = document.getElementById('test3-result');
+  result.innerHTML = '<div class="status info">測試中...</div>';
+  log('開始讀取測試...', 'info');
+  
+  try {
+    const snapshot = await testDb.ref('test/read').once('value');
+    const data = snapshot.val();
+    result.innerHTML = `<div class="status success">✓ 讀取成功</div><pre>數據: ${JSON.stringify(data, null, 2)}</pre>`;
+    log('讀取測試成功', 'success');
+  } catch (err) {
+    result.innerHTML = `<div class="status error">✗ 讀取失敗: ${err.message}</div><pre>${err.stack}</pre>`;
+    log('讀取測試失敗: ' + err.message, 'error');
+    
+    if (err.code === 'PERMISSION_DENIED') {
+      result.innerHTML += '<div class="status error">⚠️ 權限被拒絕！請檢查 Firebase 規則設置</div>';
+    }
+  }
+}
+
+// Test 4: Write Permission
+async function testWrite() {
+  const result = document.getElementById('test4-result');
+  result.innerHTML = '<div class="status info">測試中...</div>';
+  log('開始寫入測試...', 'info');
+  
+  try {
+    const testData = {
+      timestamp: Date.now(),
+      message: 'Firebase 寫入測試'
+    };
+    await testDb.ref('test/write').set(testData);
+    result.innerHTML = `<div class="status success">✓ 寫入成功</div><pre>寫入數據: ${JSON.stringify(testData, null, 2)}</pre>`;
+    log('寫入測試成功', 'success');
+  } catch (err) {
+    result.innerHTML = `<div class="status error">✗ 寫入失敗: ${err.message}</div><pre>${err.stack}</pre>`;
+    log('寫入測試失敗: ' + err.message, 'error');
+    
+    if (err.code === 'PERMISSION_DENIED') {
+      result.innerHTML += '<div class="status error">⚠️ 權限被拒絕！請檢查 Firebase 規則設置</div>';
+    }
+  }
+}
+
+// Test 5: Create Room
+async function testCreateRoom() {
+  const result = document.getElementById('test5-result');
+  result.innerHTML = '<div class="status info">測試中...</div>';
+  log('開始創建房間測試...', 'info');
+  
+  try {
+    const roomCode = 'TEST' + Math.random().toString(36).substr(2, 2).toUpperCase();
+    const room = {
+      code: roomCode,
+      mode: 'auto',
+      hostId: 'test-host-' + Date.now(),
+      maxPlayers: 6,
+      status: 'waiting',
+      players: [{
+        id: 'test-player-1',
+        nickname: '測試玩家',
+        online: true
+      }],
+      chat: []
+    };
+    
+    await testDb.ref(`rooms/${roomCode}`).set(room);
+    result.innerHTML = `<div class="status success">✓ 房間創建成功</div><pre>房間碼: ${roomCode}\n數據: ${JSON.stringify(room, null, 2)}</pre>`;
+    log('房間創建測試成功: ' + roomCode, 'success');
+    
+    // Try to read it back
+    const snapshot = await testDb.ref(`rooms/${roomCode}`).once('value');
+    const readBack = snapshot.val();
+    if (readBack) {
+      result.innerHTML += '<div class="status success">✓ 房間讀取驗證成功</div>';
+      log('房間讀取驗證成功', 'success');
+    }
+  } catch (err) {
+    result.innerHTML = `<div class="status error">✗ 房間創建失敗: ${err.message}</div><pre>${err.stack}</pre>`;
+    log('房間創建測試失敗: ' + err.message, 'error');
+    
+    if (err.code === 'PERMISSION_DENIED') {
+      result.innerHTML += `
+        <div class="status error">
+          <strong>⚠️ 權限被拒絕！</strong><br><br>
+          請按照以下步驟設置 Firebase 規則：<br>
+          1. 打開 Firebase Console: https://console.firebase.google.com/<br>
+          2. 選擇你的項目 (undercover-e8c2d)<br>
+          3. 左側菜單點擊 "Realtime Database"<br>
+          4. 點擊 "規則" 標籤<br>
+          5. 將規則改為：<br>
+          <pre>{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</pre>
+          6. 點擊 "發布"
+        </div>
+      `;
+    }
+  }
+}
+
+log('測試工具已就緒', 'success');
+</script>
+</body>
+</html>

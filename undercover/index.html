@@ -1,0 +1,2846 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>誰是臥底</title>
+<style>
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a24;
+  --surface2: #22222f;
+  --surface3: #2a2a3a;
+  --border: rgba(255,255,255,0.08);
+  --accent: #7c3aed;
+  --accent2: #9d5cf6;
+  --accent-glow: rgba(124,58,237,0.3);
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --text: #f0f0f5;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif; overflow: hidden; }
+#app { height: 100%; display: flex; flex-direction: column; }
+.view { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+.view.active { display: flex; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+h2 { font-size: 1.4rem; font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 600; }
+p { line-height: 1.6; color: var(--text2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.18s ease; user-select: none; white-space: nowrap; }
+.btn:active { transform: scale(0.96); }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 20px var(--accent-glow); }
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary { background: var(--surface3); color: var(--text); }
+.btn-secondary:hover { background: #333348; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-sm { padding: 8px 16px; font-size: 0.875rem; border-radius: 8px; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.input { width: 100%; padding: 14px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 1rem; outline: none; transition: border-color 0.18s; }
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text3); }
+textarea.input { resize: vertical; min-height: 100px; font-family: inherit; }
+.label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.3px; }
+.form-group { margin-bottom: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; }
+.badge-accent { background: var(--accent-glow); color: var(--accent2); }
+.badge-success { background: rgba(34,197,94,0.15); color: var(--success); }
+.badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+.badge-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+.badge-gray { background: var(--surface3); color: var(--text2); }
+.toggle-wrap { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.toggle-wrap:last-child { border-bottom: none; }
+.toggle-label { font-size: 0.95rem; font-weight: 500; }
+.toggle-sub { font-size: 0.8rem; color: var(--text3); margin-top: 2px; }
+.toggle { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--surface3); border-radius: 13px; cursor: pointer; transition: background 0.2s; }
+.toggle-slider:before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider:before { transform: translateX(22px); }
+.stepper { display: flex; align-items: center; gap: 12px; }
+.stepper-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.stepper-btn:hover { background: var(--surface3); }
+.stepper-val { font-size: 1.2rem; font-weight: 700; min-width: 32px; text-align: center; }
+.avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; position: relative; }
+.avatar-sm { width: 36px; height: 36px; font-size: 1.1rem; }
+.avatar-lg { width: 64px; height: 64px; font-size: 2rem; }
+.avatar-xl { width: 80px; height: 80px; font-size: 2.5rem; }
+.offline-dot { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg); }
+.online-dot { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: var(--success); border-radius: 50%; border: 2px solid var(--bg); }
+.player-chip { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.player-chip .name { font-weight: 600; font-size: 0.95rem; }
+.player-chip .sub { font-size: 0.78rem; color: var(--text3); }
+.view-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); position: sticky; top: 0; z-index: 10; }
+.view-header .title { font-size: 1rem; font-weight: 700; flex: 1; }
+.back-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background 0.15s; }
+.back-btn:hover { background: var(--surface3); }
+.room-code { font-size: 2.5rem; font-weight: 900; letter-spacing: 8px; color: var(--accent2); text-align: center; font-variant-numeric: tabular-nums; }
+.timer-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-ring .track { fill: none; stroke: var(--surface3); stroke-width: 4; }
+.timer-ring .progress { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+.timer-ring .label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; }
+.speech-entry { display: flex; gap: 8px; margin-bottom: 10px; animation: fadeIn 0.3s ease; }
+.speech-entry .entry-avatar { flex-shrink: 0; }
+.speech-entry .entry-body { flex: 1; }
+.speech-entry .entry-name { font-size: 0.72rem; color: var(--text3); margin-bottom: 3px; }
+.speech-entry .entry-text { background: var(--surface2); padding: 8px 12px; border-radius: 0 12px 12px 12px; font-size: 0.88rem; line-height: 1.45; display: inline-block; max-width: 100%; }
+.speech-entry.system { justify-content: center; }
+.speech-entry.system .entry-text { background: transparent; color: var(--text3); font-size: 0.8rem; font-style: italic; }
+.vote-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface2); border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; transition: background 0.15s, border-color 0.15s; margin-bottom: 10px; }
+.vote-card:not(.selected):hover { background: var(--surface3); }
+.vote-card.selected { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+.vote-card.voted-out { opacity: 0.4; pointer-events: none; }
+.vote-count { margin-left: auto; font-size: 0.85rem; font-weight: 700; color: var(--accent2); }
+.id-card { background: linear-gradient(135deg, var(--surface2) 0%, var(--surface3) 100%); border: 1px solid var(--border); border-radius: 24px; padding: 32px 24px; text-align: center; position: relative; overflow: hidden; }
+.id-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: var(--accent-glow); border-radius: 50%; filter: blur(40px); }
+.id-card .role-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+.id-card .word { font-size: 2.2rem; font-weight: 900; color: var(--text); margin: 16px 0; }
+.id-card .role-badge { font-size: 1rem; font-weight: 700; padding: 6px 18px; border-radius: 20px; display: inline-block; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.center { align-items: center; }
+.modal-box { background: var(--surface); border-radius: 24px 24px 0 0; padding: 28px 24px; width: 100%; max-width: 480px; animation: slideUp 0.3s ease; }
+.modal-overlay.center .modal-box { border-radius: 24px; margin: 20px; }
+.modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow); animation: slideUp 0.3s ease; white-space: nowrap; }
+.scroll-content { flex: 1; overflow-y: auto; padding: 20px; }
+#view-home { background: var(--bg); }
+.home-hero { padding: 60px 24px 32px; text-align: center; }
+.home-logo { font-size: 3.5rem; margin-bottom: 16px; }
+.home-title { font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, #fff 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
+.home-sub { color: var(--text2); font-size: 1rem; }
+.home-actions { padding: 0 24px 40px; display: flex; flex-direction: column; gap: 12px; }
+.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.player-grid-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center; }
+.player-grid-item .name { font-size: 0.85rem; font-weight: 600; word-break: break-all; }
+.player-grid-item .tag { font-size: 0.7rem; color: var(--text3); }
+.speaking-order { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; }
+.speaking-order::-webkit-scrollbar { height: 0; }
+.order-chip { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; opacity: 0.4; transition: opacity 0.3s; }
+.order-chip.current { opacity: 1; }
+.order-chip.done { opacity: 0.25; }
+.order-chip .chip-name { font-size: 0.65rem; color: var(--text2); max-width: 48px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Avatar with SVG timer ring overlay */
+.avatar-timer-wrap { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+.avatar-timer-wrap .avatar-inner { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+.avatar-timer-wrap svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+.avatar-timer-wrap .at-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 3; }
+.avatar-timer-wrap .at-progress { fill: none; stroke: #f97316; stroke-width: 3; stroke-linecap: round; }
+@keyframes blink-ring { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+.at-progress.blink { animation: blink-ring 0.6s ease-in-out infinite; }
+.speech-log { flex: 1; overflow-y: auto; padding: 10px 16px; display: flex; flex-direction: column; }
+.speech-input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; background: var(--bg); }
+.speech-input { flex: 1; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 24px; color: var(--text); font-size: 0.95rem; outline: none; }
+.speech-input:focus { border-color: var(--accent); }
+.speech-send { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.speech-send:disabled { opacity: 0.3; cursor: not-allowed; }
+.center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 24px; text-align: center; gap: 16px; }
+.tabs { display: flex; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; gap: 4px; }
+.tab { flex: 1; padding: 10px; border-radius: 8px; border: none; background: transparent; color: var(--text2); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+.tab.active { background: var(--accent); color: #fff; }
+.speaking-pulse { display: inline-flex; gap: 4px; align-items: center; }
+.speaking-pulse span { width: 4px; height: 16px; background: var(--accent); border-radius: 2px; animation: pulse-bar 0.8s ease-in-out infinite; }
+.speaking-pulse span:nth-child(2) { animation-delay: 0.15s; }
+.speaking-pulse span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pulse-bar { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pop { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+.anim-fade { animation: fadeIn 0.3s ease forwards; }
+.anim-pop { animation: pop 0.4s ease forwards; }
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+.divider-text { display: flex; align-items: center; gap: 12px; color: var(--text3); font-size: 0.8rem; margin: 20px 0; }
+.divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.w-full { width: 100%; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.text-center { text-align: center; }
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.text-muted { color: var(--text2); }
+.text-accent { color: var(--accent2); }
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }
+.text-warn { color: var(--warn); }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
+.hidden { display: none !important; }
+
+/* chat-fab removed */
+
+/* ── CHAT STREAM (bottom of speaking view) ── */
+#chat-stream {
+  height: 100px; overflow-y: auto; padding: 4px 16px 0;
+  flex-shrink: 0; display: flex; flex-direction: column;
+}
+#chat-stream::-webkit-scrollbar { width: 3px; }
+#chat-stream::-webkit-scrollbar-thumb { background: var(--surface3); }
+.chat-line { font-size: 0.8rem; line-height: 1.5; padding: 1px 0; animation: fadeIn 0.25s ease; flex-shrink: 0; }
+.chat-line .cl-name { font-weight: 700; margin-right: 4px; }
+.chat-line .cl-text { color: var(--text2); }
+
+/* ── CHAT INPUT BAR (always at bottom) ── */
+#chat-input-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-top: 1px solid var(--border);
+  background: var(--bg); flex-shrink: 0;
+}
+#chat-input {
+  flex: 1; padding: 9px 14px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 24px;
+  color: var(--text); font-size: 0.88rem; outline: none;
+}
+#chat-input:focus { border-color: var(--border); }
+#chat-input::placeholder { color: var(--text3); }
+#chat-send {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--surface3);
+  border: none; color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;
+}
+#chat-send:hover { background: var(--accent); color: #fff; }
+
+/* ── ROUND COLLAPSE ── */
+.round-group { margin-bottom: 4px; }
+.round-summary {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+  cursor: pointer; list-style: none; border-radius: 8px;
+  color: var(--text3); font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.5px; user-select: none;
+  transition: background 0.15s;
+}
+.round-summary:hover { background: var(--surface2); color: var(--text2); }
+.round-summary::marker, .round-summary::-webkit-details-marker { display: none; }
+.round-chevron { font-size: 0.65rem; transition: transform 0.2s; }
+details[open] .round-chevron { transform: rotate(90deg); }
+.round-entries { padding: 0 4px; }
+#speech-popup {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 80;
+  background: var(--surface); border-top: 2px solid var(--accent);
+  border-radius: 20px 20px 0 0; padding: 12px 14px 16px;
+  box-shadow: 0 -8px 32px rgba(124,58,237,0.25);
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+#speech-popup.show { transform: translateY(0); }
+#speech-popup .popup-label {
+  font-size: 0.72rem; font-weight: 700; color: var(--accent2);
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+}
+#speech-popup-row { display: flex; gap: 10px; align-items: center; }
+#speech-popup-input {
+  flex: 1; padding: 12px 16px; background: var(--surface2);
+  border: 1px solid var(--accent); border-radius: 24px;
+  color: var(--text); font-size: 0.95rem; outline: none;
+}
+#speech-popup-send {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--accent);
+  border: none; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══════════════════════════════════════════
+     VIEW: HOME
+══════════════════════════════════════════ -->
+<div id="view-home" class="view active">
+  <div class="home-hero" style="position:relative;">
+    <button id="lang-toggle" onclick="toggleLang()" style="position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600;">简体</button>
+    <div class="home-logo">🕵️</div>
+    <div class="home-title">誰是臥底</div>
+    <p class="home-sub">Who is Undercover</p>
+  </div>
+  <div class="home-actions">
+    <button class="btn btn-primary btn-full" onclick="showModal('modal-create')" style="font-size:1.1rem;padding:18px;" data-i18n="btn_create_room">
+      ✦ 創建房間
+    </button>
+    <button class="btn btn-ghost btn-full" onclick="showModal('modal-join')" style="font-size:1.1rem;padding:18px;" data-i18n="btn_join_room">
+      → 加入房間
+    </button>
+    <p class="text-center text-xs text-muted mt-12" data-i18n="home_sub">支援 2–12 人 · 無需下載 · 即開即玩</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: WAITING ROOM
+══════════════════════════════════════════ -->
+<div id="view-waiting" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <span class="title" id="wait-title" data-i18n="waiting_room">等待室</span>
+    <span id="wait-mode-badge" class="badge badge-accent" data-i18n="mode_auto">自動詞庫</span>
+  </div>
+  <div class="scroll-content">
+    <div class="text-center mb-12">
+      <p class="text-xs text-muted mb-8" data-i18n="room_code_label">房間碼</p>
+      <div class="room-code" id="wait-room-code">------</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="copyRoomLink()" data-i18n="btn_copy_link">🔗 複製邀請連結</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyCodeOnly()" data-i18n="btn_copy_code">📋 複製房間碼</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="flex justify-between items-center mb-12">
+      <h3 data-i18n="player_list">玩家列表</h3>
+      <span id="wait-player-count" class="badge badge-gray">0 / 0</span>
+    </div>
+    <div id="wait-player-grid" class="player-grid"></div>
+
+    <!-- HOST SETTINGS (auto mode) -->
+    <div id="wait-settings-auto" class="mt-20 hidden">
+      <h3 class="mb-12" data-i18n="game_settings">遊戲設定</h3>
+      <div class="card">
+        <div class="toggle-wrap">
+          <div>
+            <div class="toggle-label" data-i18n="enable_white_card">啟用白卡 (Mr. White)</div>
+            <div class="toggle-sub" data-i18n="white_card_desc">白卡玩家不知道任何詞語</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="set-white"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-label" data-i18n="undercover_count">卧底數量</div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('set-undercover',-1)">−</button>
+            <span class="stepper-val" id="set-undercover">1</span>
+            <button class="stepper-btn" onclick="stepChange('set-undercover',1)">+</button>
+          </div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-label" data-i18n="white_card_count">白卡數量</div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('set-white-count',-1)">−</button>
+            <span class="stepper-val" id="set-white-count">0</span>
+            <button class="stepper-btn" onclick="stepChange('set-white-count',1)">+</button>
+          </div>
+        </div>
+        <div class="toggle-wrap">
+          <div>
+            <div class="toggle-label" data-i18n="word_category">詞庫分類</div>
+          </div>
+          <select class="input" id="set-category" style="width:auto;padding:8px 12px;">
+            <option value="all" data-i18n="cat_all">全部</option>
+            <option value="food" data-i18n="cat_food">食物</option>
+            <option value="animal" data-i18n="cat_animal">動物</option>
+            <option value="place" data-i18n="cat_place">地點</option>
+            <option value="object" data-i18n="cat_object">物品</option>
+            <option value="life" data-i18n="cat_life">生活</option>
+            <option value="other" data-i18n="cat_other">其他</option>
+            <option value="nsfw" data-i18n="cat_nsfw">🔞 成人</option>
+            <option value="custom" data-i18n="cat_custom">自定義</option>
+          </select>
+        </div>
+        <div id="custom-words-wrap" class="hidden" style="padding-top:12px;">
+          <label class="label" data-i18n="custom_words_label">自定義詞對（每行一對，逗號分隔）</label>
+          <textarea class="input" id="set-custom-words" placeholder="蘋果,芒果&#10;手機,電腦&#10;貓咪,狗狗"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOST SETTINGS (host mode) -->
+    <div id="wait-settings-host" class="mt-20 hidden">
+      <h3 class="mb-12" data-i18n="host_settings">主持人設定</h3>
+      <div class="card">
+        <div class="form-group">
+          <label class="label" data-i18n="host_word_pairs_label">詞對（平民詞 , 臥底詞）</label>
+          <textarea class="input" id="host-word-pairs" placeholder="蘋果,芒果&#10;手機,電腦"></textarea>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-label" data-i18n="undercover_count">臥底數量</div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('host-undercover',-1)">−</button>
+            <span class="stepper-val" id="host-undercover">1</span>
+            <button class="stepper-btn" onclick="stepChange('host-undercover',1)">+</button>
+          </div>
+        </div>
+        <div class="toggle-wrap">
+          <div class="toggle-label" data-i18n="white_card_count">白卡數量</div>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="stepChange('host-white-count',-1)">−</button>
+            <span class="stepper-val" id="host-white-count">0</span>
+            <button class="stepper-btn" onclick="stepChange('host-white-count',1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="wait-host-actions" class="mt-20 hidden">
+      <button class="btn btn-primary btn-full" id="btn-start-game" onclick="hostStartGame()" data-i18n="btn_start_game">開始遊戲 →</button>
+      <button class="btn btn-ghost btn-full mt-8 hidden" id="btn-transfer-host" onclick="showTransferHostModal()" data-i18n="btn_transfer_host">👑 轉移主持人</button>
+      <button class="btn btn-danger btn-full mt-8" onclick="confirmForceEnd()" data-i18n="btn_force_end">強制結束遊戲</button>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: IDENTITY CARD
+══════════════════════════════════════════ -->
+<div id="view-identity" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <span class="title" data-i18n="your_identity">你的身份</span>
+    <span id="id-round-badge" class="badge badge-gray">第 1 輪</span>
+  </div>
+  <div class="center-content">
+    <div class="id-card anim-pop" style="width:100%;max-width:340px;">
+      <div class="role-label" data-i18n="your_secret_word">你的秘密詞語</div>
+      <div id="id-avatar" class="avatar avatar-xl" style="margin:0 auto 12px;"></div>
+      <div id="id-name" style="font-weight:700;font-size:1.1rem;margin-bottom:4px;"></div>
+      <div class="word" id="id-word">???</div>
+    </div>
+    <p class="text-sm text-muted text-center" style="max-width:280px;" data-i18n="remember_word">記住你的詞語，不要讓別人看到！</p>
+    <button class="btn btn-primary btn-full" style="max-width:340px;" onclick="confirmIdentity()" data-i18n="btn_confirm_identity">✓ 我已記住，隱藏詞語</button>
+    <div id="id-waiting-msg" class="hidden text-center">
+      <p class="text-muted text-sm" data-i18n="waiting_others_identity">等待其他玩家確認身份…</p>
+      <div id="id-confirmed-list" class="flex gap-8 mt-12" style="flex-wrap:wrap;justify-content:center;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: SPEAKING
+══════════════════════════════════════════ -->
+<div id="view-speaking" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <div class="title" id="speak-phase-label" data-i18n="speaking_phase">發言階段</div>
+  </div>
+
+  <!-- Speaking order strip -->
+  <div style="padding:8px 16px 0;flex-shrink:0;">
+    <div class="speaking-order" id="speak-order-strip"></div>
+  </div>
+
+  <!-- Speech log -->
+  <div class="speech-log" id="speech-log"></div>
+
+  <!-- Chat stream (scrolling chat messages, always visible) -->
+  <div id="chat-stream"></div>
+
+  <!-- Chat input bar (always at bottom, for chatting) -->
+  <div id="chat-input-bar">
+    <!-- Host skip button: visible when it's NOT the host's own turn -->
+    <button id="btn-skip-other" class="btn btn-ghost btn-sm hidden" onclick="skipCurrentSpeaker()" style="flex-shrink:0;padding:8px 10px;font-size:0.78rem;" data-i18n="btn_skip">跳過</button>
+    <input id="chat-input" placeholder="聊天…" maxlength="200" data-i18n-placeholder="chat_placeholder">
+    <button id="chat-send" onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<!-- Speech popup (floats up when it's your turn to speak) -->
+<div id="speech-popup">
+  <div class="popup-label" data-i18n="your_turn">✦ 輪到你發言了</div>
+  <div id="speech-popup-row">
+    <!-- Host skip button: visible when it IS the host's own turn -->
+    <button id="btn-skip-speaker" class="btn btn-ghost btn-sm hidden" onclick="skipCurrentSpeaker()" style="flex-shrink:0;padding:8px 12px;font-size:0.8rem;" data-i18n="btn_skip">跳過</button>
+    <input id="speech-popup-input" placeholder="輸入你的描述…" maxlength="200" data-i18n-placeholder="speech_placeholder">
+    <button id="speech-popup-send" onclick="submitSpeech()">↑</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: VOTE
+══════════════════════════════════════════ -->
+<div id="view-vote" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <span class="title" data-i18n="vote_title">投票淘汰</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="vote-round-badge" class="badge badge-warn">第 1 輪</span>
+      <div class="timer-ring" id="vote-timer" style="width:48px;height:48px;">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle class="track" cx="24" cy="24" r="20"/>
+          <circle class="progress" id="vote-timer-progress" cx="24" cy="24" r="20" stroke-dasharray="125.7" stroke-dashoffset="0"/>
+        </svg>
+        <div class="label" id="vote-timer-label" style="font-size:0.8rem;">60</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-content">
+    <p class="text-muted text-sm mb-12" data-i18n="vote_desc">選出你認為最可疑的玩家，超時視為棄票</p>
+    <div id="vote-list"></div>
+    <div id="vote-status" class="text-center text-sm text-muted mt-12"></div>
+    <div id="vote-host-actions" class="hidden mt-16">
+      <button class="btn btn-primary btn-full" onclick="hostRevealVotes()">公佈投票結果</button>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: RESULT (per round elimination)
+══════════════════════════════════════════ -->
+<div id="view-result" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <span class="title" data-i18n="round_result">本輪結果</span>
+  </div>
+  <div class="center-content">
+    <div id="result-content" style="width:100%;max-width:360px;"></div>
+    <div id="result-host-actions" class="hidden w-full" style="max-width:360px;">
+      <button class="btn btn-primary btn-full" onclick="hostNextRound()" data-i18n="btn_next_round">下一輪 →</button>
+      <button class="btn btn-ghost btn-full mt-8" onclick="hostEndGame()" data-i18n="btn_end_game">結束遊戲</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: GAME OVER
+══════════════════════════════════════════ -->
+<div id="view-gameover" class="view">
+  <div class="view-header">
+    <span class="title" style="flex:1;text-align:center;" data-i18n="game_over">遊戲結束</span>
+  </div>
+  <div class="scroll-content">
+    <div id="gameover-content" class="text-center"></div>
+    <div class="divider"></div>
+    <h3 class="mb-12" data-i18n="all_player_identities">所有玩家身份</h3>
+    <div id="gameover-players"></div>
+    <div class="mt-20" id="gameover-host-actions" style="display:none;">
+      <button class="btn btn-primary btn-full" onclick="hostPlayAgain()" data-i18n="btn_play_again">🔄 再來一局</button>
+      <button class="btn btn-ghost btn-full mt-8" onclick="backToHome()" data-i18n="btn_back_home">返回主頁</button>
+    </div>
+    <div class="mt-20" id="gameover-wait-msg" style="display:none;">
+      <p class="text-center text-muted text-sm mb-12" data-i18n="waiting_host_decision">等待房主決定是否再來一局…</p>
+      <button class="btn btn-ghost btn-full" onclick="backToHome()" data-i18n="btn_back_home">返回主頁</button>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     VIEW: HOST MC (主持人觀察視圖)
+══════════════════════════════════════════ -->
+<div id="view-host-mc" class="view">
+  <div class="view-header">
+    <button class="back-btn" onclick="confirmLeave()">←</button>
+    <span class="title" data-i18n="mc_view_title">主持人視角</span>
+    <span class="badge badge-warn">MC</span>
+  </div>
+  <div class="scroll-content">
+    <div class="card mb-12">
+      <div class="text-xs text-muted mb-8" data-i18n="current_phase">當前階段</div>
+      <div id="mc-phase" class="font-bold" style="font-size:1.1rem;">等待中</div>
+    </div>
+    <h3 class="mb-12" data-i18n="mc_player_identities">玩家身份（僅主持人可見）</h3>
+    <div id="mc-player-list"></div>
+    <div class="mt-16" id="mc-actions"></div>
+    <div style="height:80px;"></div>
+  </div>
+</div>
+
+<!-- (chat UI is now inline in view-speaking) -->
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+<!-- Create Room -->
+<div id="modal-create" class="modal-overlay" style="display:none;" onclick="closeModalOutside(event,'modal-create')">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_create_title">創建房間</div>
+    <div class="form-group">
+      <label class="label" data-i18n="nickname_label">你的暱稱</label>
+      <input class="input" id="create-nickname" placeholder="輸入暱稱" maxlength="12" data-i18n-placeholder="nickname_placeholder">
+    </div>
+    <div class="form-group">
+      <label class="label" data-i18n="game_mode_label">遊戲模式</label>
+      <div class="tabs">
+        <button class="tab active" id="tab-auto" onclick="switchCreateTab('auto')" data-i18n="mode_auto_tab">🎲 自動詞庫</button>
+        <button class="tab" id="tab-host" onclick="switchCreateTab('host')" data-i18n="mode_host_tab">🎤 主持人模式</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="label" data-i18n="max_players_label">玩家人數上限</label>
+      <div class="stepper">
+        <button class="stepper-btn" onclick="stepChange('create-max-players',-1)">−</button>
+        <span class="stepper-val" id="create-max-players">6</span>
+        <button class="stepper-btn" onclick="stepChange('create-max-players',1)">+</button>
+      </div>
+      <p class="text-xs text-muted mt-8" id="create-mode-note" data-i18n="host_mode_note">主持人模式下，房主不參與遊戲，人數上限自動 +1</p>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="createRoom()" data-i18n="btn_create_room_submit">創建房間</button>
+  </div>
+</div>
+
+<!-- Join Room -->
+<div id="modal-join" class="modal-overlay" style="display:none;" onclick="closeModalOutside(event,'modal-join')">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_join_title">加入房間</div>
+    <div class="form-group">
+      <label class="label" data-i18n="nickname_label">你的暱稱</label>
+      <input class="input" id="join-nickname" placeholder="輸入暱稱" maxlength="12" data-i18n-placeholder="nickname_placeholder">
+    </div>
+    <div class="form-group">
+      <label class="label" data-i18n="room_code_label_modal">房間碼</label>
+      <input class="input" id="join-code" placeholder="輸入 6 位房間碼" maxlength="6" style="letter-spacing:6px;font-size:1.3rem;font-weight:700;text-transform:uppercase;" data-i18n-placeholder="room_code_placeholder">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="joinRoom()" data-i18n="btn_join_room_submit">加入房間</button>
+  </div>
+</div>
+
+<!-- Confirm Leave -->
+<div id="modal-leave" class="modal-overlay center" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_leave_title">離開房間？</div>
+    <p class="text-muted text-sm mb-12" data-i18n="modal_leave_desc">確認後將離開當前房間，遊戲進度不會保留。</p>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost w-full" onclick="closeModal('modal-leave')" data-i18n="btn_cancel">取消</button>
+      <button class="btn btn-danger w-full" onclick="leaveRoom()" data-i18n="btn_confirm_leave">確認離開</button>
+    </div>
+  </div>
+</div>
+
+<!-- White Card Guess -->
+<div id="modal-white-guess" class="modal-overlay center" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_white_guess_title">🃏 白卡猜詞機會</div>
+    <p class="text-muted text-sm mb-12" id="white-guess-prompt" data-i18n="white_guess_prompt">你被投出了！猜出平民詞語即可獲勝！</p>
+    <input class="input mb-12" id="white-guess-input" placeholder="輸入你猜的平民詞…" data-i18n-placeholder="white_guess_placeholder">
+    <button class="btn btn-primary btn-full" onclick="submitWhiteGuess()" data-i18n="btn_submit_guess">提交猜測</button>
+  </div>
+</div>
+
+<!-- Force End Confirm -->
+<div id="modal-force-end" class="modal-overlay center" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_force_end_title">強制結束遊戲？</div>
+    <p class="text-muted text-sm mb-12" data-i18n="modal_force_end_desc">所有玩家將看到結算頁面，身份公開。</p>
+    <div class="flex gap-8">
+      <button class="btn btn-ghost w-full" onclick="closeModal('modal-force-end')" data-i18n="btn_cancel">取消</button>
+      <button class="btn btn-danger w-full" onclick="forceEndGame()" data-i18n="btn_confirm_end">確認結束</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Host -->
+<div id="modal-transfer-host" class="modal-overlay center" style="display:none;" onclick="closeModalOutside(event,'modal-transfer-host')">
+  <div class="modal-box">
+    <div class="modal-title" data-i18n="modal_transfer_title">轉移主持人</div>
+    <p class="text-muted text-sm mb-12" data-i18n="modal_transfer_desc">選擇新的主持人（將接管出題和控制權）</p>
+    <div id="transfer-player-list"></div>
+    <button class="btn btn-ghost btn-full mt-12" onclick="closeModal('modal-transfer-host')" data-i18n="btn_cancel">取消</button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+</div><!-- #app -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+// ══════════════════════════════════════════
+// FIREBASE INIT
+// ══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyD75zDy0mhq7IvL_z3xI3oXFtDn76FK9bY",
+  authDomain: "undercover-e8c2d.firebaseapp.com",
+  databaseURL: "https://undercover-e8c2d-default-rtdb.firebaseio.com",
+  projectId: "undercover-e8c2d",
+  storageBucket: "undercover-e8c2d.firebasestorage.app",
+  messagingSenderId: "609159439247",
+  appId: "1:609159439247:web:5aa0c580b698a83b3d21fa"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+</script>
+
+<script>
+// ══════════════════════════════════════════
+// WORD DATABASE
+// ══════════════════════════════════════════
+const WORD_DB = {
+  food: [
+    // 原有
+    ['蘋果','芒果'],['可樂','雪碧'],['壽司','刺身'],['漢堡','熱狗'],['拉麵','烏冬'],
+    ['草莓','藍莓'],['西瓜','哈密瓜'],['咖啡','奶茶'],['披薩','意粉'],['豆腐','豆漿'],
+    ['冰淇淋','雪糕'],['餃子','湯圓'],['烤鴨','烤雞'],['火鍋','燒烤'],['麵包','蛋糕'],
+    // 新增
+    ['牛奶','豆漿'],['烤肉','涮肉'],['白菜','生菜'],['牛肉乾','豬肉脯'],['泡泡糖','棒棒糖'],
+    ['紅燒牛肉麵','香辣牛肉麵'],['油條','麻花'],['酸菜魚','水煮魚'],['果粒橙','鮮橙多'],
+    ['辣椒','芥末'],['餅乾','薯片'],['橙子','橘子'],['葡萄','提子'],['小籠包','灌湯包'],
+    ['鐵觀音','碧螺春']
+  ],
+  animal: [
+    // 原有
+    ['貓咪','狗狗'],['老虎','獅子'],['大象','河馬'],['企鵝','海豹'],['蝴蝶','蜜蜂'],
+    ['金魚','熱帶魚'],['兔子','松鼠'],['烏龜','蜥蜴'],['鸚鵡','麻雀'],['螃蟹','龍蝦'],
+    ['熊貓','北極熊'],['長頸鹿','斑馬'],['鯊魚','鯨魚'],['老鷹','貓頭鷹'],['青蛙','蟾蜍'],
+    // 新增
+    ['海豚','海獅'],['蜘蛛','蠍子'],['狼','豺'],['天鵝','白鷺'],['螢火蟲','瓢蟲'],
+    ['駱駝','羊駝'],['水母','海葵'],['貂','水獺'],['孔雀','火烈鳥'],
+    ['蟒蛇','眼鏡蛇'],['倉鼠','豚鼠'],['海馬','海龍']
+  ],
+  place: [
+    // 原有
+    ['圖書館','書店'],['醫院','診所'],['機場','火車站'],['海灘','游泳池'],['電影院','劇院'],
+    ['超市','便利店'],['公園','廣場'],['學校','補習班'],['餐廳','咖啡廳'],['健身房','瑜伽室'],
+    ['博物館','美術館'],['動物園','水族館'],['銀行','郵局'],['酒店','民宿'],['寺廟','教堂'],
+    // 新增
+    ['公交','地鐵'],['過山車','碰碰車'],['婚紗店','喜餅店'],['理髮店','美容院'],
+    ['夜市','早市'],['遊樂場','主題公園'],['停車場','加油站'],['菜市場','農貿市場'],
+    ['KTV','酒吧'],['溫泉','桑拿'],['書院','私塾'],['天台','陽台'],
+    ['地下室','閣樓'],['操場','球場'],['候車室','候機室']
+  ],
+  object: [
+    // 原有
+    ['手機','平板'],['鋼琴','吉他'],['雨傘','雨衣'],['眼鏡','隱形眼鏡'],['鑰匙','門卡'],
+    ['書包','行李箱'],['枕頭','被子'],['蠟燭','手電筒'],['剪刀','美工刀'],['鏡子','相框'],
+    ['耳機','喇叭'],['手錶','鬧鐘'],['錢包','手提包'],['帽子','圍巾'],['牙刷','牙膏'],
+    // 新增
+    ['紙巾','濕巾'],['近視眼鏡','隱形眼鏡'],['洗髮露','護髮素'],['沐浴露','沐浴鹽'],
+    ['打印機','掃描機'],['麥克風','擴音器'],['壁紙','貼畫'],['鴨舌帽','遮陽帽'],
+    ['被子','床單'],['玻璃','鏡子'],['臉盆','水桶'],['積木','拼圖'],
+    ['吉他','琵琶'],['手機','座機'],['盒子','箱子']
+  ],
+  nsfw: [
+    ['乳头','阴蒂'],['精液','淫水'],['润滑剂','按摩油'],['跳蛋','按摩棒'],['拉珠','肛塞'],
+    ['口交','深喉'],['潮吹','失禁'],['皮鞭','皮拍'],['口枷','开口器'],['乳夹','乳钉'],
+    ['扩张','润滑'],['龟责','寸止'],['内射','外射'],['颜射','口爆'],['深喉','吞精'],
+    ['贞操锁','锁精环'],['雪松味','龙涎香'],['咬痕','吻痕'],['牵引绳','狗链'],['扩张器','窥阴器'],
+    ['鸡鸡','假阳具'],['狼牙套套','羊眼圈'],['亲吻','舌吻']
+  ],
+
+  other: [
+    ['乙女','梦女'],['哈基米','小克'],['比格','哈士奇'],['骨科','背德'],['拉扯','钓系'],
+    ['龙傲天','玛丽苏'],['彩虹屁','夸夸群'],['广场舞','街操'],['易感期','发情期'],['狼狗塑','奶狗塑'],
+    ['人外','兽人'],['魅魔','色魔']
+  ],
+
+  life: [
+    ['男朋友','前男友'],['情人節','光棍節'],['新年','跨年'],['同學','同桌'],
+    ['結婚','訂婚'],['雙胞胎','龍鳳胎'],['暗戀','備胎'],['兩小無猜','青梅竹馬'],
+    ['生活費','零花錢'],['班主任','輔導員'],['作文','論文'],['婚紗','喜服'],
+    ['保安','保鏢'],['作家','編劇'],['魔術師','魔法師'],
+    ['狀元','冠軍'],['冠軍','第一'],['奬牌','金牌'],['勇往直前','全力以赴'],
+    ['語無倫次','詞不達意'],['鼠目寸光','井底之蛙'],['十面埋伏','四面楚歌'],
+    ['童話','神話'],['小品','話劇'],['丑小鴨','灰姑娘'],['梁山伯與祝英台','羅密歐與朱麗葉'],
+    ['福爾摩斯','工藤新一'],['蜘蛛俠','蝙蝠俠'],['張韶涵','王心凌'],['那英','韓紅']
+  ]
+};
+
+// ══════════════════════════════════════════
+// EMOJI AVATAR SYSTEM
+// ══════════════════════════════════════════
+const EMOJIS = ['🦊','🐼','🐨','🦁','🐯','🐸','🐧','🦋','🐙','🦄','🐺','🦝','🐻','🐮','🐷','🦊','🐹','🐰','🦔','🐦'];
+// Two fixed avatar colors: self = accent purple, others = slate blue
+const COLOR_SELF = '#7c3aed';   // var(--accent)
+const COLOR_OTHER = '#334155';  // neutral slate
+
+function getAvatar(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffffffff;
+  const emoji = EMOJIS[Math.abs(hash) % EMOJIS.length];
+  return { emoji };
+}
+
+// Always: self = purple, others = slate
+function getAvatarColor(playerId) {
+  return playerId === myId ? COLOR_SELF : COLOR_OTHER;
+}
+
+function renderAvatar(name, sizeClass = '') {
+  const { emoji } = getAvatar(name);
+  return `<div class="avatar ${sizeClass}" style="background:${COLOR_OTHER};">${emoji}</div>`;
+}
+
+// ══════════════════════════════════════════
+// I18N — LANGUAGE TOGGLE
+// ══════════════════════════════════════════
+const TRANSLATIONS = {
+  'zh-TW': {
+    // Home
+    btn_create_room: '✦ 創建房間',
+    btn_join_room: '→ 加入房間',
+    home_sub: '支援 2–12 人 · 無需下載 · 即開即玩',
+    // Create room modal
+    modal_create_title: '創建房間',
+    nickname_label: '你的暱稱',
+    nickname_placeholder: '輸入暱稱',
+    game_mode_label: '遊戲模式',
+    mode_auto_tab: '🎲 自動詞庫',
+    mode_host_tab: '🎤 主持人模式',
+    max_players_label: '玩家人數上限',
+    host_mode_note: '主持人模式下，房主不參與遊戲，人數上限自動 +1',
+    btn_create_room_submit: '創建房間',
+    // Join room modal
+    modal_join_title: '加入房間',
+    room_code_label_modal: '房間碼',
+    room_code_placeholder: '輸入 6 位房間碼',
+    btn_join_room_submit: '加入房間',
+    // Waiting room
+    waiting_room: '等待室',
+    mode_auto: '自動詞庫',
+    mode_host: '主持人模式',
+    room_code_label: '房間碼',
+    btn_copy_link: '🔗 複製邀請連結',
+    btn_copy_code: '📋 複製房間碼',
+    player_list: '玩家列表',
+    game_settings: '遊戲設定',
+    enable_white_card: '啟用白卡 (Mr. White)',
+    white_card_desc: '白卡玩家不知道任何詞語',
+    undercover_count: '卧底數量',
+    white_card_count: '白卡數量',
+    word_category: '詞庫分類',
+    cat_all: '全部',
+    cat_food: '食物',
+    cat_animal: '動物',
+    cat_place: '地點',
+    cat_object: '物品',
+    cat_life: '生活',
+    cat_other: '其他',
+    cat_nsfw: '🔞 成人',
+    cat_custom: '自定義',
+    custom_words_label: '自定義詞對（每行一對，逗號分隔）',
+    host_settings: '主持人設定',
+    host_word_pairs_label: '詞對（平民詞 , 臥底詞）',
+    btn_start_game: '開始遊戲 →',
+    btn_transfer_host: '👑 轉移主持人',
+    btn_force_end: '強制結束遊戲',
+    badge_ready: '準備好',
+    badge_not_ready: '未準備',
+    badge_host: '房主',
+    badge_you: '你',
+    badge_mc: 'MC',
+    btn_ready: '✓ 準備好了',
+    btn_already_ready: '✓ 已準備好',
+    // Identity view
+    your_identity: '你的身份',
+    your_secret_word: '你的秘密詞語',
+    remember_word: '記住你的詞語，不要讓別人看到！',
+    btn_confirm_identity: '✓ 我已記住，隱藏詞語',
+    waiting_others_identity: '等待其他玩家確認身份…',
+    // Speaking view
+    speaking_phase: '發言階段',
+    btn_skip: '跳過',
+    chat_placeholder: '聊天…',
+    your_turn: '✦ 輪到你發言了',
+    speech_placeholder: '輸入你的描述…',
+    // Vote view
+    vote_title: '投票淘汰',
+    vote_desc: '選出你認為最可疑的玩家，超時視為棄票',
+    voted_count: '人已確認投票',
+    btn_reveal_votes: '公佈投票結果',
+    can_reselect: '確認前可以重新選擇',
+    vote_confirmed: '✓ 已確認投票',
+    vote_details_mc: '投票詳情（僅主持人可見）',
+    votes_unit: '票',
+    remaining: '還有',
+    not_voted_yet: '人未投票，可隨時公佈',
+    reveal_with_remaining: '公佈投票結果（還有',
+    not_voted_suffix: '人未投）',
+    // Result view
+    round_result: '本輪結果',
+    eliminated: '出局',
+    highest_votes: '票數最高，已被淘汰',
+    white_card_guess_prompt: '你是白卡！猜出平民詞語即可獲勝！',
+    white_guess_input_placeholder: '輸入你猜的平民詞…',
+    btn_submit_guess: '提交猜測',
+    waiting_white_guess: '等待白卡玩家猜詞…',
+    btn_next_round: '下一輪 →',
+    btn_end_game: '結束遊戲',
+    // Game over
+    game_over: '遊戲結束',
+    all_player_identities: '所有玩家身份',
+    btn_play_again: '🔄 再來一局',
+    btn_back_home: '返回主頁',
+    waiting_host_decision: '等待房主決定是否再來一局…',
+    win_civilian: '平民勝利！',
+    win_civilian_sub: '所有臥底和白卡已被淘汰',
+    win_undercover: '臥底勝利！',
+    win_undercover_sub: '臥底成功混入到最後',
+    win_white: '白卡勝利！',
+    win_white_sub: '白卡猜出了平民詞語',
+    civilian_word_prefix: '平民詞：',
+    undercover_word_prefix: '臥底詞：',
+    badge_eliminated: '已出局',
+    badge_alive: '存活',
+    // MC view
+    mc_view_title: '主持人視角',
+    current_phase: '當前階段',
+    mc_player_identities: '玩家身份（僅主持人可見）',
+    mc_confirmed: '已確認',
+    mc_not_confirmed: '未確認',
+    mc_confirmed_count: '人已確認身份',
+    btn_start_speaking: '開始發言階段 →',
+    btn_end_speaking: '結束發言，進入投票',
+    btn_next_round_mc: '下一輪',
+    // Modals
+    modal_leave_title: '離開房間？',
+    modal_leave_desc: '確認後將離開當前房間，遊戲進度不會保留。',
+    btn_cancel: '取消',
+    btn_confirm_leave: '確認離開',
+    modal_white_guess_title: '🃏 白卡猜詞機會',
+    white_guess_prompt: '你被投出了！猜出平民詞語即可獲勝！',
+    white_guess_placeholder: '輸入你猜的平民詞…',
+    modal_force_end_title: '強制結束遊戲？',
+    modal_force_end_desc: '所有玩家將看到結算頁面，身份公開。',
+    btn_confirm_end: '確認結束',
+    modal_transfer_title: '轉移主持人',
+    modal_transfer_desc: '選擇新的主持人（將接管出題和控制權）',
+    // Toasts / system messages
+    toast_enter_nickname: '請輸入暱稱',
+    toast_copied_link: '已複製邀請連結',
+    toast_copied_code: '已複製房間碼：',
+    toast_min_players: '至少需要 3 名玩家才能開始',
+    toast_not_all_ready: '還有玩家未準備好',
+    toast_too_many_roles: '臥底+白卡數量不能超過玩家總數',
+    toast_identity_confirmed: '已確認，等待其他玩家…',
+    toast_vote_confirmed: '投票已確認',
+    toast_kicked: '已踢出玩家',
+    toast_kicked_out: '你已被踢出房間',
+    toast_room_dissolved: '你已被踢出房間或房間已解散',
+    toast_room_reset: '房間已重置，等待玩家準備',
+    toast_became_host: '你已成為主持人',
+    toast_host_left: '房主已離開，自動轉移給',
+    toast_white_win: '白卡猜對了！白卡獲勝！',
+    toast_white_wrong: '猜錯了！',
+    // Phase labels
+    phase_waiting: '等待中',
+    phase_identity: '身份確認',
+    phase_speaking: '發言階段',
+    phase_vote: '投票階段',
+    phase_result: '本輪結果',
+    phase_gameover: '遊戲結束',
+    // Role labels
+    role_civilian: '平民',
+    role_undercover: '臥底',
+    role_white: '白卡',
+    role_unknown: '未知',
+    // Dynamic
+    round_start: '── 第 {n} 輪開始 ──',
+    round_label: '第 {n} 輪',
+    tie_message: '⚖️ 平票！{names} 各加賽發言一次，重新投票',
+    skipped: '被跳過',
+    round_divider: '── 第 {n} 輪 ──',
+  },
+  'zh-CN': {
+    // Home
+    btn_create_room: '✦ 创建房间',
+    btn_join_room: '→ 加入房间',
+    home_sub: '支持 2–12 人 · 无需下载 · 即开即玩',
+    // Create room modal
+    modal_create_title: '创建房间',
+    nickname_label: '你的昵称',
+    nickname_placeholder: '输入昵称',
+    game_mode_label: '游戏模式',
+    mode_auto_tab: '🎲 自动词库',
+    mode_host_tab: '🎤 主持人模式',
+    max_players_label: '玩家人数上限',
+    host_mode_note: '主持人模式下，房主不参与游戏，人数上限自动 +1',
+    btn_create_room_submit: '创建房间',
+    // Join room modal
+    modal_join_title: '加入房间',
+    room_code_label_modal: '房间码',
+    room_code_placeholder: '输入 6 位房间码',
+    btn_join_room_submit: '加入房间',
+    // Waiting room
+    waiting_room: '等待室',
+    mode_auto: '自动词库',
+    mode_host: '主持人模式',
+    room_code_label: '房间码',
+    btn_copy_link: '🔗 复制邀请链接',
+    btn_copy_code: '📋 复制房间码',
+    player_list: '玩家列表',
+    game_settings: '游戏设置',
+    enable_white_card: '启用白卡 (Mr. White)',
+    white_card_desc: '白卡玩家不知道任何词语',
+    undercover_count: '卧底数量',
+    white_card_count: '白卡数量',
+    word_category: '词库分类',
+    cat_all: '全部',
+    cat_food: '食物',
+    cat_animal: '动物',
+    cat_place: '地点',
+    cat_object: '物品',
+    cat_life: '生活',
+    cat_other: '其他',
+    cat_nsfw: '🔞 成人',
+    cat_custom: '自定义',
+    custom_words_label: '自定义词对（每行一对，逗号分隔）',
+    host_settings: '主持人设置',
+    host_word_pairs_label: '词对（平民词 , 卧底词）',
+    btn_start_game: '开始游戏 →',
+    btn_transfer_host: '👑 转移主持人',
+    btn_force_end: '强制结束游戏',
+    badge_ready: '准备好',
+    badge_not_ready: '未准备',
+    badge_host: '房主',
+    badge_you: '你',
+    badge_mc: 'MC',
+    btn_ready: '✓ 准备好了',
+    btn_already_ready: '✓ 已准备好',
+    // Identity view
+    your_identity: '你的身份',
+    your_secret_word: '你的秘密词语',
+    remember_word: '记住你的词语，不要让别人看到！',
+    btn_confirm_identity: '✓ 我已记住，隐藏词语',
+    waiting_others_identity: '等待其他玩家确认身份…',
+    // Speaking view
+    speaking_phase: '发言阶段',
+    btn_skip: '跳过',
+    chat_placeholder: '聊天…',
+    your_turn: '✦ 轮到你发言了',
+    speech_placeholder: '输入你的描述…',
+    // Vote view
+    vote_title: '投票淘汰',
+    vote_desc: '选出你认为最可疑的玩家，超时视为弃票',
+    voted_count: '人已确认投票',
+    btn_reveal_votes: '公布投票结果',
+    can_reselect: '确认前可以重新选择',
+    vote_confirmed: '✓ 已确认投票',
+    vote_details_mc: '投票详情（仅主持人可见）',
+    votes_unit: '票',
+    remaining: '还有',
+    not_voted_yet: '人未投，可随时公布',
+    reveal_with_remaining: '公布投票结果（还有',
+    not_voted_suffix: '人未投）',
+    // Result view
+    round_result: '本轮结果',
+    eliminated: '出局',
+    highest_votes: '票数最高，已被淘汰',
+    white_card_guess_prompt: '你是白卡！猜出平民词语即可获胜！',
+    white_guess_input_placeholder: '输入你猜的平民词…',
+    btn_submit_guess: '提交猜测',
+    waiting_white_guess: '等待白卡玩家猜词…',
+    btn_next_round: '下一轮 →',
+    btn_end_game: '结束游戏',
+    // Game over
+    game_over: '游戏结束',
+    all_player_identities: '所有玩家身份',
+    btn_play_again: '🔄 再来一局',
+    btn_back_home: '返回主页',
+    waiting_host_decision: '等待房主决定是否再来一局…',
+    win_civilian: '平民胜利！',
+    win_civilian_sub: '所有卧底和白卡已被淘汰',
+    win_undercover: '卧底胜利！',
+    win_undercover_sub: '卧底成功混入到最后',
+    win_white: '白卡胜利！',
+    win_white_sub: '白卡猜出了平民词语',
+    civilian_word_prefix: '平民词：',
+    undercover_word_prefix: '卧底词：',
+    badge_eliminated: '已出局',
+    badge_alive: '存活',
+    // MC view
+    mc_view_title: '主持人视角',
+    current_phase: '当前阶段',
+    mc_player_identities: '玩家身份（仅主持人可见）',
+    mc_confirmed: '已确认',
+    mc_not_confirmed: '未确认',
+    mc_confirmed_count: '人已确认身份',
+    btn_start_speaking: '开始发言阶段 →',
+    btn_end_speaking: '结束发言，进入投票',
+    btn_next_round_mc: '下一轮',
+    // Modals
+    modal_leave_title: '离开房间？',
+    modal_leave_desc: '确认后将离开当前房间，游戏进度不会保留。',
+    btn_cancel: '取消',
+    btn_confirm_leave: '确认离开',
+    modal_white_guess_title: '🃏 白卡猜词机会',
+    white_guess_prompt: '你被投出了！猜出平民词语即可获胜！',
+    white_guess_placeholder: '输入你猜的平民词…',
+    modal_force_end_title: '强制结束游戏？',
+    modal_force_end_desc: '所有玩家将看到结算页面，身份公开。',
+    btn_confirm_end: '确认结束',
+    modal_transfer_title: '转移主持人',
+    modal_transfer_desc: '选择新的主持人（将接管出题和控制权）',
+    // Toasts / system messages
+    toast_enter_nickname: '请输入昵称',
+    toast_copied_link: '已复制邀请链接',
+    toast_copied_code: '已复制房间码：',
+    toast_min_players: '至少需要 3 名玩家才能开始',
+    toast_not_all_ready: '还有玩家未准备好',
+    toast_too_many_roles: '卧底+白卡数量不能超过玩家总数',
+    toast_identity_confirmed: '已确认，等待其他玩家…',
+    toast_vote_confirmed: '投票已确认',
+    toast_kicked: '已踢出玩家',
+    toast_kicked_out: '你已被踢出房间',
+    toast_room_dissolved: '你已被踢出房间或房间已解散',
+    toast_room_reset: '房间已重置，等待玩家准备',
+    toast_became_host: '你已成为主持人',
+    toast_host_left: '房主已离开，自动转移给',
+    toast_white_win: '白卡猜对了！白卡获胜！',
+    toast_white_wrong: '猜错了！',
+    // Phase labels
+    phase_waiting: '等待中',
+    phase_identity: '身份确认',
+    phase_speaking: '发言阶段',
+    phase_vote: '投票阶段',
+    phase_result: '本轮结果',
+    phase_gameover: '游戏结束',
+    // Role labels
+    role_civilian: '平民',
+    role_undercover: '卧底',
+    role_white: '白卡',
+    role_unknown: '未知',
+    // Dynamic
+    round_start: '── 第 {n} 轮开始 ──',
+    round_label: '第 {n} 轮',
+    tie_message: '⚖️ 平票！{names} 各加赛发言一次，重新投票',
+    skipped: '被跳过',
+    round_divider: '── 第 {n} 轮 ──',
+  }
+};
+
+let currentLang = localStorage.getItem('lang') || 'zh-TW';
+
+function t(key) {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS['zh-TW'];
+  return dict[key] || TRANSLATIONS['zh-TW'][key] || key;
+}
+
+function applyLang() {
+  // Update toggle button label: show the OTHER language
+  const btn = document.getElementById('lang-toggle');
+  if (btn) btn.textContent = currentLang === 'zh-TW' ? '简体' : '繁體';
+
+  // Apply textContent to all [data-i18n] elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+
+  // Apply placeholder to all [data-i18n-placeholder] elements
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (val) el.placeholder = val;
+  });
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'zh-TW' ? 'zh-CN' : 'zh-TW';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+  // Re-render current view if in a game room
+  if (currentRoomCode) {
+    const room = getRoom(currentRoomCode);
+    if (room) handleRoomUpdate(room);
+  }
+}
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let myId = null;
+let myNickname = null;
+let currentRoomCode = null;
+let isHost = false;
+let isHostMC = false; // host in host-mode (MC, not playing)
+let createMode = 'auto'; // 'auto' | 'host'
+let timerInterval = null;
+let voteTimerInterval = null;
+let timerSeconds = 180;
+let pollInterval = null;
+let chatOpen = false;
+let lastChatCount = 0;
+let myVote = null;
+let identityConfirmed = false;
+
+// ══════════════════════════════════════════
+// STORAGE HELPERS — Firebase Realtime DB
+// ══════════════════════════════════════════
+// Local cache of room data (updated by Firebase listener)
+let _roomCache = {};
+
+function storeGet(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+function storeSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+function storeRemove(key) {
+  try { localStorage.removeItem(key); } catch {}
+}
+
+function getRoomKey(code) { return `rooms/${code}`; }
+
+function getRoom(code) {
+  // Return from local cache (kept in sync by Firebase listener)
+  return _roomCache[code] || null;
+}
+
+function saveRoom(room) {
+  _roomCache[room.code] = room;
+  // Write to Firebase and return the promise
+  return db.ref(getRoomKey(room.code)).set(room);
+}
+
+// Firebase real-time listener (replaces BroadcastChannel + polling)
+let _roomListener = null;
+function initBC(code) {
+  // Detach previous listener
+  if (_roomListener) {
+    _roomListener();
+    _roomListener = null;
+  }
+  const ref = db.ref(getRoomKey(code));
+  const unsubscribe = ref.on('value', (snapshot) => {
+    const room = snapshot.val();
+    if (room) {
+      _roomCache[code] = room;
+      handleRoomUpdate(room);
+    }
+  }, (error) => {
+    console.error('Firebase 監聽錯誤:', error);
+    toast('連接失敗: ' + (error.message || '請檢查網絡或 Firebase 權限'));
+  });
+  _roomListener = () => ref.off('value', unsubscribe);
+}
+function broadcastRoom(room) { /* no-op, Firebase handles sync */ }
+
+// ══════════════════════════════════════════
+// SESSION RESTORE
+// ══════════════════════════════════════════
+window.addEventListener('load', async () => {
+  // Apply language on load
+  applyLang();
+
+  // Auto-fill room code from URL param
+  const urlCode = new URLSearchParams(location.search).get('room');
+  if (urlCode) {
+    document.getElementById('join-code').value = urlCode.toUpperCase();
+    showModal('modal-join');
+  }
+
+  const session = storeGet('my_session');
+  if (session) {
+    try {
+      // Fetch room from Firebase
+      const snapshot = await db.ref(getRoomKey(session.roomCode)).once('value');
+      const room = snapshot.val();
+      if (room && room.players && room.players.find(p => p.id === session.playerId)) {
+        _roomCache[session.roomCode] = room;
+        myId = session.playerId;
+        myNickname = session.nickname;
+        currentRoomCode = session.roomCode;
+        isHost = session.isHost;
+        isHostMC = session.isHostMC || false;
+        initBC(currentRoomCode);
+        // Mark online
+        const p = room.players.find(x => x.id === myId);
+        if (p) { p.online = true; await saveRoom(room); }
+        startPolling();
+        handleRoomUpdate(room);
+        return;
+      }
+    } catch (err) {
+      console.error('恢復會話失敗:', err);
+      toast('無法恢復會話: ' + (err.message || '請檢查網絡連接'));
+      storeRemove('my_session');
+    }
+  }
+  showView('view-home');
+});
+
+window.addEventListener('beforeunload', () => {
+  if (currentRoomCode) {
+    const r = getRoom(currentRoomCode);
+    if (r && r.players) {
+      const p = r.players.find(x => x.id === myId);
+      if (p) { 
+        p.online = false; 
+        saveRoom(r).catch(err => console.error('標記離線失敗:', err));
+      }
+    }
+  }
+});
+
+// ══════════════════════════════════════════
+// VIEW ROUTING
+// ══════════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  // Hide speech popup when leaving speaking view
+  if (id !== 'view-speaking') hideSpeechPopup();
+}
+
+// ══════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════
+function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, duration = 2500) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, duration);
+}
+
+// ══════════════════════════════════════════
+// STEPPER
+// ══════════════════════════════════════════
+const STEPPER_LIMITS = {
+  'set-undercover': [1, 4],
+  'set-white-count': [0, 2],
+  'host-undercover': [1, 4],
+  'host-white-count': [0, 2],
+  'create-max-players': [4, 12]
+};
+function stepChange(id, delta) {
+  const el = document.getElementById(id);
+  let val = parseInt(el.textContent) + delta;
+  const [min, max] = STEPPER_LIMITS[id] || [0, 99];
+  val = Math.max(min, Math.min(max, val));
+  el.textContent = val;
+}
+
+// ══════════════════════════════════════════
+// CREATE ROOM TAB
+// ══════════════════════════════════════════
+function switchCreateTab(mode) {
+  createMode = mode;
+  document.getElementById('tab-auto').classList.toggle('active', mode === 'auto');
+  document.getElementById('tab-host').classList.toggle('active', mode === 'host');
+  document.getElementById('create-mode-note').style.display = mode === 'host' ? 'block' : 'none';
+}
+
+document.getElementById('set-category').addEventListener('change', function() {
+  document.getElementById('custom-words-wrap').classList.toggle('hidden', this.value !== 'custom');
+});
+
+// ══════════════════════════════════════════
+// GENERATE ROOM CODE
+// ══════════════════════════════════════════
+function genRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+function genId() { return Math.random().toString(36).slice(2, 10); }
+
+// ══════════════════════════════════════════
+// CREATE ROOM
+// ══════════════════════════════════════════
+async function createRoom() {
+  const nickname = document.getElementById('create-nickname').value.trim();
+  if (!nickname) { toast(t('toast_enter_nickname')); return; }
+  const maxPlayers = parseInt(document.getElementById('create-max-players').textContent);
+  const code = genRoomCode();
+  myId = genId();
+  myNickname = nickname;
+  currentRoomCode = code;
+  isHost = true;
+  isHostMC = (createMode === 'host');
+
+  const room = {
+    code,
+    mode: createMode,
+    hostId: myId,
+    maxPlayers: isHostMC ? maxPlayers + 1 : maxPlayers,
+    status: 'waiting', // waiting | identity | speaking | vote | result | gameover
+    round: 0,
+    config: {
+      undercoverCount: 1,
+      whiteCount: 0,
+      category: 'all',
+      customWords: ''
+    },
+    players: [{
+      id: myId,
+      nickname,
+      online: true,
+      alive: true,
+      role: null,
+      word: null,
+      voted: false,
+      voteTarget: null,
+      identityConfirmed: false,
+      isHostMC: isHostMC,
+      ready: true  // host is always ready
+    }],
+    speakOrder: [],
+    currentSpeakerIdx: 0,
+    speeches: [],
+    votes: {},
+    chat: [],
+    eliminatedHistory: [],
+    winner: null,
+    wordPair: null,
+    timerStart: null,
+    voteTimerStart: null,
+    hostWordPairs: []
+  };
+
+  try {
+    await saveRoom(room);
+    storeSet('my_session', { playerId: myId, roomCode: code, nickname, isHost: true, isHostMC });
+    initBC(code);
+    closeModal('modal-create');
+    startPolling();
+    lastChatCount = 0;
+    renderWaitingRoom(room);
+    showView('view-waiting');
+    toast(`房間 ${code} 已創建`);
+  } catch (err) {
+    console.error('創建房間失敗:', err);
+    toast('創建房間失敗: ' + (err.message || '請檢查網絡連接或 Firebase 權限設置'));
+  }
+}
+
+// ══════════════════════════════════════════
+// JOIN ROOM
+// ══════════════════════════════════════════
+async function joinRoom() {
+  const nickname = document.getElementById('join-nickname').value.trim();
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if (!nickname) { toast(t('toast_enter_nickname')); return; }
+  if (code.length !== 6) { toast('請輸入 6 位房間碼'); return; }
+
+  try {
+    // Fetch room from Firebase
+    const snapshot = await db.ref(getRoomKey(code)).once('value');
+    const room = snapshot.val();
+    if (!room) { toast('找不到房間，請確認房間碼'); return; }
+    if (room.status !== 'waiting') { toast('遊戲已開始，無法加入'); return; }
+    if (!room.players) room.players = [];
+    const activePlayers = room.players.filter(p => !p.isHostMC);
+    if (activePlayers.length >= room.maxPlayers) { toast('房間已滿'); return; }
+    if (room.players.find(p => p.nickname === nickname)) { toast('暱稱已被使用'); return; }
+
+    myId = genId();
+    myNickname = nickname;
+    currentRoomCode = code;
+    isHost = false;
+    isHostMC = false;
+
+    room.players.push({
+      id: myId, nickname, online: true, alive: true,
+      role: null, word: null, voted: false, voteTarget: null,
+      identityConfirmed: false, isHostMC: false, ready: false
+    });
+    _roomCache[code] = room;
+    await saveRoom(room);
+    storeSet('my_session', { playerId: myId, roomCode: code, nickname, isHost: false, isHostMC: false });
+    initBC(code);
+    closeModal('modal-join');
+    startPolling();
+    lastChatCount = 0;
+    renderWaitingRoom(room);
+    showView('view-waiting');
+    toast(`已加入房間 ${code}`);
+  } catch (err) {
+    console.error('加入房間失敗:', err);
+    toast('加入房間失敗: ' + (err.message || '請檢查網絡連接或 Firebase 權限設置'));
+  }
+}
+
+// ══════════════════════════════════════════
+// COPY ROOM LINK / CODE
+// ══════════════════════════════════════════
+function copyRoomLink() {
+  // Build a URL with the room code as a query param so recipients can paste it in browser
+  const url = `${location.href.split('?')[0]}?room=${currentRoomCode}`;
+  navigator.clipboard.writeText(url).then(() => toast(t('toast_copied_link'))).catch(() => toast(url));
+}
+function copyCodeOnly() {
+  navigator.clipboard.writeText(currentRoomCode).then(() => toast(t('toast_copied_code') + currentRoomCode)).catch(() => toast(currentRoomCode));
+}
+// Legacy alias kept for safety
+function copyRoomCode() { copyRoomLink(); }
+
+// ══════════════════════════════════════════
+// POLLING (cross-device sync via localStorage)
+// ══════════════════════════════════════════
+// POLLING — lightweight checks (Firebase handles data sync)
+// ══════════════════════════════════════════
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(() => {
+    if (!currentRoomCode) return;
+    const room = getRoom(currentRoomCode);
+    if (!room) {
+      toast(t('toast_room_dissolved'));
+      storeRemove('my_session');
+      currentRoomCode = null; myId = null; myNickname = null;
+      isHost = false; isHostMC = false;
+      if (pollInterval) clearInterval(pollInterval);
+      showView('view-home');
+      return;
+    }
+    // Check if we're still in the player list (kicked check)
+    if (!room.players || !room.players.find(p => p.id === myId)) {
+      toast(t('toast_kicked_out'));
+      storeRemove('my_session');
+      currentRoomCode = null; myId = null; myNickname = null;
+      isHost = false; isHostMC = false;
+      if (pollInterval) clearInterval(pollInterval);
+      showView('view-home');
+      return;
+    }
+
+    // If host has left the room, auto-transfer
+    const hostPlayer = room.players.find(p => p.id === room.hostId);
+    if (!hostPlayer) {
+      const onlinePlayers = room.players.filter(p => p.online);
+      if (onlinePlayers.length > 0) {
+        const coordinator = [...onlinePlayers].sort((a,b) => a.id < b.id ? -1 : 1)[0];
+        if (coordinator.id === myId) {
+          const r = getRoom(currentRoomCode);
+          if (r && !r.players.find(p => p.id === r.hostId)) {
+            const newHost = r.players.find(p => p.online) || r.players[0];
+            if (newHost) {
+              newHost.isHostMC = r.mode === 'host';
+              newHost.ready = true;
+              r.hostId = newHost.id;
+              saveRoom(r);
+              toast(`${t('toast_host_left')} ${newHost.nickname}`);
+            }
+          }
+        }
+      }
+    }
+  }, 2000);
+}
+
+// ══════════════════════════════════════════
+// ROOM UPDATE HANDLER (main state machine)
+// ══════════════════════════════════════════
+function handleRoomUpdate(room) {
+  if (!room) return;
+  const currentView = document.querySelector('.view.active')?.id;
+
+  // Detect if we just became the host (transfer)
+  if (room.hostId === myId && !isHost) {
+    isHost = true;
+    const myPlayer = room.players.find(p => p.id === myId);
+    isHostMC = myPlayer?.isHostMC || false;
+    storeSet('my_session', { playerId: myId, roomCode: currentRoomCode, nickname: myNickname, isHost: true, isHostMC });
+    toast(t('toast_became_host'));
+  }
+  // Detect if we lost host (transfer away)
+  if (room.hostId !== myId && isHost) {
+    isHost = false;
+    isHostMC = false;
+    storeSet('my_session', { playerId: myId, roomCode: currentRoomCode, nickname: myNickname, isHost: false, isHostMC: false });
+  }
+
+  if (room.status === 'waiting') {
+    if (currentView !== 'view-waiting') {
+      renderWaitingRoom(room);
+      showView('view-waiting');
+    } else {
+      renderWaitingRoom(room);
+    }
+  } else if (room.status === 'identity') {
+    if (isHostMC) {
+      // MC sees all identities + confirmation status + manual start button
+      renderHostMC(room);
+      if (currentView !== 'view-host-mc') showView('view-host-mc');
+    } else {
+      if (currentView !== 'view-identity') {
+        renderIdentityView(room);
+        showView('view-identity');
+      } else {
+        updateIdentityConfirmedList(room);
+      }
+    }
+  } else if (room.status === 'speaking') {
+    // MC joins the game view like everyone else
+    if (currentView !== 'view-speaking') {
+      renderSpeakingView(room);
+      showView('view-speaking');
+    } else {
+      updateSpeakingView(room);
+    }
+  } else if (room.status === 'vote') {
+    // MC joins the vote view like everyone else (but can't vote)
+    if (currentView !== 'view-vote') {
+      renderVoteView(room);
+      showView('view-vote');
+    } else {
+      updateVoteView(room);
+    }
+  } else if (room.status === 'result') {
+    if (currentView !== 'view-result') {
+      renderResultView(room);
+      showView('view-result');
+    }
+  } else if (room.status === 'gameover') {
+    if (currentView !== 'view-gameover') {
+      renderGameOver(room);
+      showView('view-gameover');
+    }
+  }
+
+  // Update chat
+  updateChatMessages(room);
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════
+// WAITING ROOM RENDER
+// ══════════════════════════════════════════
+function renderWaitingRoom(room) {
+  document.getElementById('wait-room-code').textContent = room.code;
+  document.getElementById('wait-mode-badge').textContent = room.mode === 'auto' ? t('mode_auto') : t('mode_host');
+  document.getElementById('wait-title').textContent = `${t('waiting_room')} · ${room.code}`;
+
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  document.getElementById('wait-player-count').textContent = `${activePlayers.length} / ${room.maxPlayers - (room.players.some(p=>p.isHostMC)?1:0)}`;
+
+  const isHostUser = myId === room.hostId;
+  const allReady = activePlayers.every(p => p.ready);
+  const myPlayer = room.players.find(p => p.id === myId);
+  const amReady = myPlayer?.ready || false;
+
+  const grid = document.getElementById('wait-player-grid');
+  grid.innerHTML = room.players.map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    const isMe = p.id === myId;
+    const isHostPlayer = p.id === room.hostId;
+    const avatarBg = getAvatarColor(p.id);
+    const readyBadge = p.ready
+      ? `<span class="badge badge-success" style="font-size:0.6rem;">${t('badge_ready')}</span>`
+      : `<span class="badge badge-gray" style="font-size:0.6rem;">${t('badge_not_ready')}</span>`;
+    const hostBadge = isHostPlayer
+      ? (p.isHostMC ? `<span class="badge badge-warn" style="font-size:0.6rem;">${t('badge_mc')}</span>` : `<span class="badge badge-accent" style="font-size:0.6rem;">${t('badge_host')}</span>`)
+      : '';
+    const meBadge = isMe ? `<span class="badge badge-success" style="font-size:0.6rem;">${t('badge_you')}</span>` : '';
+    // Kick button: host can kick non-host players
+    const kickBtn = (isHostUser && !isMe && !p.isHostMC)
+      ? `<button onclick="kickPlayer('${p.id}')" style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:var(--danger);border:none;color:#fff;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>`
+      : '';
+    return `<div class="player-grid-item" style="position:relative;">
+      ${kickBtn}
+      <div class="avatar" style="background:${avatarBg};">${emoji}${p.online ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}</div>
+      <div class="name">${escHtml(p.nickname)}</div>
+      <div class="tag" style="display:flex;gap:3px;flex-wrap:wrap;justify-content:center;">${hostBadge}${meBadge}${!isHostPlayer ? readyBadge : ''}</div>
+    </div>`;
+  }).join('');
+
+  // Settings panels
+  document.getElementById('wait-settings-auto').classList.toggle('hidden', !(isHostUser && room.mode === 'auto'));
+  document.getElementById('wait-settings-host').classList.toggle('hidden', !(isHostUser && room.mode === 'host'));
+  document.getElementById('wait-host-actions').classList.toggle('hidden', !isHostUser);
+  // Transfer host only in host mode
+  const transferBtn = document.getElementById('btn-transfer-host');
+  if (transferBtn) transferBtn.classList.toggle('hidden', room.mode !== 'host');
+
+  // Start button: disabled if not all ready
+  const startBtn = document.getElementById('btn-start-game');
+  if (startBtn) {
+    startBtn.disabled = !allReady;
+    startBtn.title = allReady ? '' : '等待所有玩家準備好';
+  }
+
+  // Show ready button for non-host non-MC players
+  let readyArea = document.getElementById('wait-ready-area');
+  if (!readyArea) {
+    readyArea = document.createElement('div');
+    readyArea.id = 'wait-ready-area';
+    readyArea.style.cssText = 'margin-top:20px;';
+    document.getElementById('wait-host-actions').parentNode.insertBefore(readyArea, document.getElementById('wait-host-actions'));
+  }
+  if (!isHostUser && !myPlayer?.isHostMC) {
+    readyArea.innerHTML = amReady
+      ? `<button class="btn btn-success btn-full" disabled style="background:var(--success);color:#fff;opacity:0.8;">${t('btn_already_ready')}</button>`
+      : `<button class="btn btn-primary btn-full" onclick="setReady()">${t('btn_ready')}</button>`;
+  } else {
+    readyArea.innerHTML = '';
+  }
+}
+
+function setReady() {
+  const room = getRoom(currentRoomCode);
+  const p = room.players.find(x => x.id === myId);
+  if (p) { p.ready = true; saveRoom(room); }
+}
+
+function kickPlayer(playerId) {
+  const room = getRoom(currentRoomCode);
+  if (myId !== room.hostId) return;
+  room.players = room.players.filter(p => p.id !== playerId);
+  saveRoom(room);
+  toast(t('toast_kicked'));
+}
+
+function showTransferHostModal() {
+  const room = getRoom(currentRoomCode);
+  const candidates = room.players.filter(p => p.id !== myId && !p.isHostMC);
+  const list = document.getElementById('transfer-player-list');
+  if (!candidates.length) { toast('沒有其他玩家可以轉移'); return; }
+  list.innerHTML = candidates.map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    return `<div class="player-chip" style="margin-bottom:10px;cursor:pointer;" onclick="transferHostTo('${p.id}')">
+      <div class="avatar avatar-sm" style="background:${COLOR_OTHER};">${emoji}</div>
+      <div style="flex:1;"><div class="font-bold">${escHtml(p.nickname)}</div></div>
+      <span style="color:var(--accent2);font-size:0.85rem;">選擇 →</span>
+    </div>`;
+  }).join('');
+  showModal('modal-transfer-host');
+}
+
+function transferHostTo(newHostId) {
+  closeModal('modal-transfer-host');
+  const room = getRoom(currentRoomCode);
+  if (!room || myId !== room.hostId) return;
+
+  const newHost = room.players.find(p => p.id === newHostId);
+  if (!newHost) return;
+
+  // Determine if new host should be MC (only in host mode)
+  const newIsHostMC = room.mode === 'host';
+
+  // Update old host: no longer host, no longer MC, becomes regular player
+  const oldHost = room.players.find(p => p.id === myId);
+  if (oldHost) {
+    oldHost.isHostMC = false;
+    oldHost.ready = false;
+  }
+
+  // Update new host
+  newHost.isHostMC = newIsHostMC;
+  newHost.ready = true;
+
+  room.hostId = newHostId;
+  saveRoom(room);
+
+  // Update local session
+  isHost = false;
+  isHostMC = false;
+  storeSet('my_session', { playerId: myId, roomCode: currentRoomCode, nickname: myNickname, isHost: false, isHostMC: false });
+
+  toast(`已將主持人轉移給 ${newHost.nickname}`);
+}
+
+// ══════════════════════════════════════════
+// HOST START GAME
+// ══════════════════════════════════════════
+function hostStartGame() {
+  const room = getRoom(currentRoomCode);
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  if (activePlayers.length < 3) { toast(t('toast_min_players')); return; }
+  if (!activePlayers.every(p => p.ready)) { toast(t('toast_not_all_ready')); return; }
+
+  // Read config
+  if (room.mode === 'auto') {
+    room.config.undercoverCount = parseInt(document.getElementById('set-undercover').textContent);
+    room.config.whiteCount = parseInt(document.getElementById('set-white-count').textContent);
+    room.config.category = document.getElementById('set-category').value;
+    room.config.customWords = document.getElementById('set-custom-words').value.trim();
+  } else {
+    room.config.undercoverCount = parseInt(document.getElementById('host-undercover').textContent);
+    room.config.whiteCount = parseInt(document.getElementById('host-white-count').textContent);
+    const pairs = document.getElementById('host-word-pairs').value.trim();
+    if (!pairs) { toast('請輸入至少一對詞語'); return; }
+    room.hostWordPairs = pairs.split('\n').map(l => l.split(/[,，\s]+/).map(s=>s.trim()).filter(Boolean)).filter(p=>p.length>=2);
+    if (!room.hostWordPairs.length) { toast('詞對格式錯誤，請每行輸入「平民詞,臥底詞」'); return; }
+  }
+
+  const total = activePlayers.length;
+  const uc = room.config.undercoverCount;
+  const wc = room.config.whiteCount;
+  if (uc + wc >= total) { toast(t('toast_too_many_roles')); return; }
+
+  // Assign roles & words
+  assignRolesAndWords(room);
+  room.status = 'identity';
+  room.round = 1;
+  room.players.forEach(p => { p.identityConfirmed = false; });
+  saveRoom(room);
+}
+
+function assignRolesAndWords(room) {
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  const total = activePlayers.length;
+  const uc = room.config.undercoverCount;
+  const wc = room.config.whiteCount;
+
+  // Pick word pair
+  let pair;
+  if (room.mode === 'host') {
+    pair = room.hostWordPairs[Math.floor(Math.random() * room.hostWordPairs.length)];
+  } else if (room.config.category === 'custom' && room.config.customWords) {
+    const lines = room.config.customWords.split('\n').map(l => l.split(/[,，\s]+/).map(s=>s.trim()).filter(Boolean)).filter(p=>p.length>=2);
+    pair = lines.length ? lines[Math.floor(Math.random() * lines.length)] : getRandomPair('all');
+  } else {
+    pair = getRandomPair(room.config.category);
+  }
+  room.wordPair = pair;
+
+  // Shuffle players and assign roles
+  const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
+  const roles = Array(total - uc - wc).fill('civilian').concat(Array(uc).fill('undercover')).concat(Array(wc).fill('white'));
+  roles.sort(() => Math.random() - 0.5);
+
+  shuffled.forEach((p, i) => {
+    const player = room.players.find(x => x.id === p.id);
+    player.role = roles[i];
+    player.word = roles[i] === 'civilian' ? pair[0] : roles[i] === 'undercover' ? pair[1] : '';
+    player.alive = true;
+    player.voted = false;
+    player.voteTarget = null;
+    player.identityConfirmed = false;
+  });
+
+  // Speak order (random, alive non-MC players)
+  room.speakOrder = activePlayers.map(p=>p.id).sort(() => Math.random() - 0.5);
+  room.currentSpeakerIdx = 0;
+  room.speeches = [{ type: 'system', text: t('round_start').replace('{n}', '1') }];
+  room.votes = {};
+}
+
+function getRandomPair(category) {
+  let pool = [];
+  if (category === 'all') {
+    Object.values(WORD_DB).forEach(arr => pool.push(...arr));
+  } else {
+    pool = WORD_DB[category] || WORD_DB.food;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ══════════════════════════════════════════
+// IDENTITY VIEW
+// ══════════════════════════════════════════
+function renderIdentityView(room) {
+  identityConfirmed = false;
+  const me = room.players.find(p => p.id === myId);
+  if (!me) return;
+
+  document.getElementById('id-round-badge').textContent = t('round_label').replace('{n}', room.round);
+  document.getElementById('id-avatar').outerHTML; // placeholder
+  const avatarEl = document.getElementById('id-avatar');
+  const { emoji } = getAvatar(me.nickname);
+  avatarEl.style.background = getAvatarColor(me.id);
+  avatarEl.textContent = emoji;
+
+  document.getElementById('id-name').textContent = me.nickname;
+
+  const wordEl = document.getElementById('id-word');
+
+  if (me.role === 'white') {
+    wordEl.textContent = '???';
+  } else {
+    wordEl.textContent = me.word;
+  }
+
+  // Always restore confirm button when entering identity view
+  const btn = document.querySelector('#view-identity .btn-primary');
+  if (btn) { btn.style.display = ''; btn.disabled = false; }
+
+  document.getElementById('id-waiting-msg').classList.add('hidden');
+  updateIdentityConfirmedList(room);
+}
+
+function updateIdentityConfirmedList(room) {
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  const confirmed = activePlayers.filter(p => p.identityConfirmed);
+  const listEl = document.getElementById('id-confirmed-list');
+  listEl.innerHTML = activePlayers.map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    const avatarBg = getAvatarColor(p.id);
+    const done = p.identityConfirmed;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;opacity:${done?1:0.3};">
+      <div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}</div>
+      <span style="font-size:0.65rem;color:var(--text3);">${done?'✓':''}</span>
+    </div>`;
+  }).join('');
+
+  // If all confirmed, auto-move to speaking (auto mode only; host-MC mode uses manual button)
+  if (confirmed.length === activePlayers.length && myId === room.hostId && room.mode !== 'host') {
+    const r = getRoom(currentRoomCode);
+    if (r.status === 'identity') {
+      r.status = 'speaking';
+      r.timerStart = Date.now();
+      saveRoom(r);
+    }
+  }
+}
+
+function confirmIdentity() {
+  identityConfirmed = true;
+  const room = getRoom(currentRoomCode);
+  const p = room.players.find(x => x.id === myId);
+  if (p) { p.identityConfirmed = true; saveRoom(room); }
+  document.getElementById('id-word').textContent = '••••••';
+  document.getElementById('id-waiting-msg').classList.remove('hidden');
+  // Do NOT disable the button — just hide it after confirming
+  const btn = document.querySelector('#view-identity .btn-primary');
+  if (btn) btn.style.display = 'none';
+  toast(t('toast_identity_confirmed'));
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════
+// SPEAKING VIEW
+// ══════════════════════════════════════════
+function renderSpeakingView(room) {
+  // Clear rendered log on first entry (new game)
+  const log = document.getElementById('speech-log');
+  log.innerHTML = '';
+  log.dataset.rendered = '0';
+  log.dataset.currentRound = '';
+  // Reset strip cache so it rebuilds on first updateSpeakingView call
+  const strip = document.getElementById('speak-order-strip');
+  if (strip) strip.dataset.speakerIdx = '-1';
+  updateSpeakingView(room);
+  startSpeakTimer(room);
+}
+
+function updateSpeakingView(room) {
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const order = room.speakOrder.filter(id => activePlayers.find(p=>p.id===id));
+  const currentId = order[room.currentSpeakerIdx];
+
+  // Update phase label — show MC badge if host-MC
+  const phaseLabel = document.getElementById('speak-phase-label');
+  if (phaseLabel) {
+    phaseLabel.innerHTML = isHostMC
+      ? `${t('speaking_phase')} <span class="badge badge-warn" style="font-size:0.65rem;vertical-align:middle;">MC</span>`
+      : t('speaking_phase');
+  }
+
+  // Only rebuild the order strip when the speaker index actually changes
+  const strip = document.getElementById('speak-order-strip');
+  const prevIdx = parseInt(strip.dataset.speakerIdx ?? '-1');
+  if (prevIdx !== room.currentSpeakerIdx) {
+    strip.dataset.speakerIdx = room.currentSpeakerIdx;
+    const CIRC = 2 * Math.PI * 19;
+    strip.innerHTML = order.map((id, i) => {
+      const p = room.players.find(x => x.id === id);
+      const { emoji } = getAvatar(p.nickname);
+      const avatarColor = getAvatarColor(id);
+      const cls = i < room.currentSpeakerIdx ? 'done' : i === room.currentSpeakerIdx ? 'current' : '';
+      const isCurrent = i === room.currentSpeakerIdx;
+      const isHostPlayer = id === room.hostId;
+      const hostDot = isHostPlayer ? '<span style="position:absolute;top:-1px;right:-1px;width:8px;height:8px;background:var(--danger);border-radius:50%;border:1.5px solid var(--bg);"></span>' : '';
+      if (isCurrent) {
+        return `<div class="order-chip ${cls}">
+          <div class="avatar-timer-wrap">
+            <svg width="44" height="44" viewBox="0 0 44 44">
+              <circle class="at-track" cx="22" cy="22" r="19"/>
+              <circle class="at-progress" id="at-progress" cx="22" cy="22" r="19"
+                stroke-dasharray="${CIRC.toFixed(1)}" stroke-dashoffset="0"/>
+            </svg>
+            <div class="avatar-inner" style="background:${avatarColor};position:relative;">${emoji}${hostDot}</div>
+          </div>
+          <span class="chip-name" style="color:var(--text);font-weight:700;">${escHtml(p.nickname)}</span>
+        </div>`;
+      }
+      return `<div class="order-chip ${cls}">
+        <div class="avatar avatar-sm" style="background:${avatarColor};position:relative;">${emoji}${hostDot}</div>
+        <span class="chip-name">${escHtml(p.nickname)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Skip buttons:
+  // btn-skip-speaker: inside speech-popup, shown when host's OWN turn
+  // btn-skip-other: in chat bar, shown when host needs to skip SOMEONE ELSE
+  const isHostUser = myId === room.hostId;
+  const isMyTurn = currentId === myId;
+  const skipInPopup = document.getElementById('btn-skip-speaker');
+  const skipInBar = document.getElementById('btn-skip-other');
+  if (skipInPopup) skipInPopup.classList.toggle('hidden', !(isHostUser && isMyTurn));
+  if (skipInBar) skipInBar.classList.toggle('hidden', !(isHostUser && !isMyTurn));
+
+  // Show/hide speech popup for current player
+  if (currentId === myId) {
+    showSpeechPopup();
+  } else {
+    hideSpeechPopup();
+  }
+
+  // Speech log
+  renderSpeechLog(room);
+
+  // Auto-advance if all spoke
+  if (room.currentSpeakerIdx >= order.length && myId === room.hostId) {
+    const r = getRoom(currentRoomCode);
+    if (r.status === 'speaking') {
+      r.status = 'vote';
+      r.votes = {};
+      r.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+      saveRoom(r);
+    }
+  }
+}
+
+function renderSpeechLog(room) {
+  const log = document.getElementById('speech-log');
+  const entries = room.speeches || [];
+
+  // Count already-rendered entries via a data attribute on the log itself
+  const rendered = parseInt(log.dataset.rendered || '0');
+  if (rendered === entries.length) return;
+
+  // If entries shrank (new game reset), full re-render
+  if (rendered > entries.length) {
+    log.innerHTML = '';
+    log.dataset.rendered = '0';
+    log.dataset.currentRound = '';
+  }
+
+  const newEntries = entries.slice(rendered);
+
+  newEntries.forEach((e, i) => {
+    const globalIdx = rendered + i;
+
+    // Detect round boundary from system messages like "── 第 N 輪開始 ──" or "── 第 N 轮开始 ──"
+    const roundMatch = e.type === 'system' && e.text.match(/第\s*(\d+)\s*[輪轮]/);
+
+    if (roundMatch) {
+      const roundNum = parseInt(roundMatch[1]);
+      const prevRound = parseInt(log.dataset.currentRound || '0');
+
+      // Close previous round's <details> (collapse it) if there was one
+      if (prevRound > 0) {
+        const prevDetails = log.querySelector(`details[data-round="${prevRound}"]`);
+        if (prevDetails) prevDetails.removeAttribute('open');
+      }
+
+      // Create new <details> group for this round, open by default
+      const details = document.createElement('details');
+      details.setAttribute('data-round', roundNum);
+      details.setAttribute('open', '');
+      details.className = 'round-group';
+
+      const summary = document.createElement('summary');
+      summary.className = 'round-summary';
+      summary.innerHTML = `<span class="round-chevron">▶</span> ${t('round_label').replace('{n}', roundNum)}`;
+      details.appendChild(summary);
+
+      const entriesDiv = document.createElement('div');
+      entriesDiv.className = 'round-entries';
+      entriesDiv.setAttribute('data-round-entries', roundNum);
+      details.appendChild(entriesDiv);
+
+      log.appendChild(details);
+      log.dataset.currentRound = roundNum;
+
+    } else {
+      // Append entry into current round group (or directly if no group yet)
+      const currentRound = log.dataset.currentRound;
+      let target = currentRound
+        ? log.querySelector(`[data-round-entries="${currentRound}"]`)
+        : log;
+      if (!target) target = log;
+
+      const div = document.createElement('div');
+      div.setAttribute('data-entry-idx', globalIdx);
+
+      if (e.type === 'system') {
+        div.className = 'speech-entry system';
+        div.innerHTML = `<div class="entry-text">${escHtml(e.text)}</div>`;
+      } else {
+        const p = room.players.find(x => x.id === e.playerId);
+        if (!p) { log.dataset.rendered = globalIdx + 1; return; }
+        const { emoji } = getAvatar(p.nickname);
+        const avatarBg = getAvatarColor(p.id);
+        div.className = 'speech-entry';
+        div.innerHTML = `
+          <div class="entry-avatar"><div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}</div></div>
+          <div class="entry-body">
+            <div class="entry-name">${escHtml(p.nickname)}</div>
+            <div class="entry-text">${escHtml(e.text)}</div>
+          </div>`;
+      }
+      target.appendChild(div);
+    }
+  });
+
+  log.dataset.rendered = entries.length;
+  log.scrollTop = log.scrollHeight;
+}
+
+function submitSpeech() {
+  const input = document.getElementById('speech-popup-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const room = getRoom(currentRoomCode);
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const order = room.speakOrder.filter(id => activePlayers.find(p=>p.id===id));
+  if (order[room.currentSpeakerIdx] !== myId) return;
+
+  room.speeches.push({ type: 'speech', playerId: myId, text });
+  room.currentSpeakerIdx++;
+  input.value = '';
+  hideSpeechPopup();
+
+  if (room.currentSpeakerIdx >= order.length) {
+    room.status = 'vote';
+    room.votes = {};
+    room.voteTimerStart = Date.now();
+    room.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+    clearSpeakTimer();
+  } else {
+    room.timerStart = Date.now();
+  }
+  saveRoom(room);
+}
+
+document.getElementById('speech-popup-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitSpeech();
+});
+
+function skipCurrentSpeaker() {
+  const room = getRoom(currentRoomCode);
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const order = room.speakOrder.filter(id => activePlayers.find(p=>p.id===id));
+  const skippedId = order[room.currentSpeakerIdx];
+  const skipped = room.players.find(p => p.id === skippedId);
+  room.speeches.push({ type: 'system', text: `${skipped?.nickname || '玩家'} ${t('skipped')}` });
+  room.currentSpeakerIdx++;
+  if (room.currentSpeakerIdx >= order.length) {
+    room.status = 'vote';
+    room.votes = {};
+    room.voteTimerStart = Date.now();
+    room.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+    clearSpeakTimer();
+  } else {
+    room.timerStart = Date.now();
+  }
+  saveRoom(room);
+}
+
+function startSpeakTimer(room) {
+  clearSpeakTimer();
+  const DURATION = 180;
+  const CIRC = 2 * Math.PI * 19; // r=19
+
+  function tick() {
+    const r = getRoom(currentRoomCode);
+    if (!r || r.status !== 'speaking') { clearSpeakTimer(); return; }
+    const elapsed = Math.floor((Date.now() - (r.timerStart || Date.now())) / 1000);
+    const remaining = Math.max(0, DURATION - elapsed);
+
+    const prog = document.getElementById('at-progress');
+    if (prog) {
+      // Compute offset: 0 = full ring, CIRC = empty ring
+      const offset = CIRC * (remaining / DURATION); // decreases as time passes
+      // Set directly without CSS transition to avoid the "rewind" glitch
+      prog.style.transition = 'none';
+      prog.style.strokeDashoffset = offset;
+      // Blink when ≤30s
+      if (remaining <= 30) {
+        prog.classList.add('blink');
+      } else {
+        prog.classList.remove('blink');
+      }
+    }
+    if (remaining === 0 && myId === r.hostId) {
+      skipCurrentSpeaker();
+    }
+  }
+  timerInterval = setInterval(tick, 1000);
+  tick();
+}
+
+function clearSpeakTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function showSpeechPopup() {
+  const popup = document.getElementById('speech-popup');
+  if (popup) {
+    popup.classList.add('show');
+    setTimeout(() => document.getElementById('speech-popup-input')?.focus(), 320);
+  }
+}
+function hideSpeechPopup() {
+  const popup = document.getElementById('speech-popup');
+  if (popup) popup.classList.remove('show');
+}
+
+// Auto-skip offline speaker
+setInterval(() => {
+  if (!currentRoomCode) return;
+  const room = getRoom(currentRoomCode);
+  if (!room || room.status !== 'speaking' || myId !== room.hostId) return;
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const order = room.speakOrder.filter(id => activePlayers.find(p=>p.id===id));
+  const currentId = order[room.currentSpeakerIdx];
+  if (!currentId) return;
+  const currentP = room.players.find(p => p.id === currentId);
+  if (currentP && !currentP.online) {
+    skipCurrentSpeaker();
+  }
+}, 3000);
+</script>
+
+<script>
+// ══════════════════════════════════════════
+// VOTE VIEW
+// ══════════════════════════════════════════
+const VOTE_DURATION = 60;
+
+function renderVoteView(room) {
+  document.getElementById('vote-round-badge').textContent = t('round_label').replace('{n}', room.round);
+  myVote = null; // reset local vote state on entering vote view
+  // Show MC note if host-MC
+  if (isHostMC) {
+    const title = document.querySelector('#view-vote .view-header .title');
+    if (title) title.innerHTML = `${t('vote_title')} <span class="badge badge-warn" style="font-size:0.65rem;vertical-align:middle;">MC</span>`;
+  }
+  // Start vote timer if not already started
+  if (!room.voteTimerStart) {
+    if (myId === room.hostId) {
+      const r = getRoom(currentRoomCode);
+      r.voteTimerStart = Date.now();
+      saveRoom(r);
+    }
+  }
+  updateVoteView(room);
+  startVoteTimer(room);
+}
+
+function startVoteTimer(room) {
+  clearVoteTimer();
+  function tick() {
+    const r = getRoom(currentRoomCode);
+    if (!r || r.status !== 'vote') { clearVoteTimer(); return; }
+    const elapsed = Math.floor((Date.now() - (r.voteTimerStart || Date.now())) / 1000);
+    const remaining = Math.max(0, VOTE_DURATION - elapsed);
+    const label = document.getElementById('vote-timer-label');
+    const prog = document.getElementById('vote-timer-progress');
+    if (label) label.textContent = remaining;
+    if (prog) {
+      const circ = 125.7;
+      prog.style.strokeDashoffset = circ * (1 - remaining / VOTE_DURATION);
+      prog.style.stroke = remaining < 15 ? 'var(--danger)' : remaining < 30 ? 'var(--warn)' : 'var(--accent)';
+    }
+    if (remaining === 0 && myId === room.hostId) {
+      clearVoteTimer();
+      hostRevealVotes();
+    }
+  }
+  voteTimerInterval = setInterval(tick, 1000);
+  tick();
+}
+
+function clearVoteTimer() {
+  if (voteTimerInterval) { clearInterval(voteTimerInterval); voteTimerInterval = null; }
+}
+
+function updateVoteView(room) {
+  const me = room.players.find(p => p.id === myId);
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const votedCount = activePlayers.filter(p => p.voted).length;
+  const allVoted = votedCount === activePlayers.length;
+
+  const tally = {};
+  activePlayers.forEach(p => { if (p.voteTarget) tally[p.voteTarget] = (tally[p.voteTarget]||0)+1; });
+
+  const hostActions = document.getElementById('vote-host-actions');
+
+  // ── MC VIEW: only show tally details + reveal button, hide player list ──
+  if (isHostMC) {
+    document.getElementById('vote-list').innerHTML = '';
+    document.getElementById('vote-status').textContent = `${votedCount} / ${activePlayers.length} ${t('voted_count')}`;
+    let confirmEl = document.getElementById('vote-confirm-area');
+    if (confirmEl) confirmEl.innerHTML = '';
+
+    const tallyRows = activePlayers.map(p => {
+      const { emoji } = getAvatar(p.nickname);
+      const bg = getAvatarColor(p.id);
+      const voters = activePlayers.filter(v => v.voteTarget === p.id).map(v => escHtml(v.nickname)).join('、');
+      const cnt = tally[p.id] || 0;
+      const voteStr = cnt > 0 ? `${cnt}${t('votes_unit')}（${voters}）` : '—';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div class="avatar avatar-sm" style="background:${bg};">${emoji}</div>
+        <div style="flex:1;font-size:0.9rem;font-weight:600;">${escHtml(p.nickname)}</div>
+        <div style="font-size:0.82rem;color:var(--accent2);font-weight:700;text-align:right;max-width:60%;">${voteStr}</div>
+      </div>`;
+    }).join('');
+
+    const btnColor = allVoted ? 'var(--success)' : 'var(--danger)';
+    const btnLabel = allVoted ? t('btn_reveal_votes') : `${t('reveal_with_remaining')} ${activePlayers.length - votedCount} ${t('not_voted_suffix')}`;
+    hostActions.classList.remove('hidden');
+    hostActions.innerHTML = `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text2);margin-bottom:8px;">${t('vote_details_mc')}</div>
+        ${tallyRows}
+      </div>
+      <button class="btn btn-full" style="background:${btnColor};color:#fff;" onclick="hostRevealVotes()">${btnLabel}</button>`;
+    return;
+  }
+
+  // ── PLAYER VIEW ──
+  const list = document.getElementById('vote-list');
+  const confirmed = me?.voted || false;
+  const showCounts = allVoted;
+
+  list.innerHTML = activePlayers.map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    const isMe = p.id === myId;
+    const isSelf = isMe;
+    const selected = myVote === p.id;
+    const count = tally[p.id] || 0;
+    const avatarBg = getAvatarColor(p.id);
+    const isHostPlayer = p.id === room.hostId;
+    const clickable = !confirmed && !isSelf && !isHostMC;
+    return `<div class="vote-card ${selected?'selected':''} ${isSelf?'vote-self':''}"
+      style="${isSelf?'opacity:0.45;cursor:not-allowed;':''}"
+      onclick="${clickable?'selectVote(\''+p.id+'\')':''}">
+      <div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}</div>
+      <div style="flex:1;">
+        <div class="font-bold" style="font-size:0.95rem;display:flex;align-items:center;gap:6px;">
+          ${escHtml(p.nickname)}
+          ${isMe?'<span style="font-size:0.7rem;color:var(--text3);">(你)</span>':''}
+          ${isHostPlayer&&!p.isHostMC?'<span class="badge badge-accent" style="font-size:0.6rem;padding:2px 6px;">房主</span>':''}
+        </div>
+      </div>
+      <div class="vote-count">${showCounts && count > 0 ? count+t('votes_unit') : (selected&&!confirmed ? '← 選中' : confirmed&&selected?t('vote_confirmed'):'')}</div>
+    </div>`;
+  }).join('');
+
+  // Confirm button
+  let confirmHtml = '';
+  if (!confirmed && myVote) {
+    const target = room.players.find(p => p.id === myVote);
+    confirmHtml = `<div style="margin-top:16px;">
+      <button class="btn btn-primary btn-full" onclick="confirmVote()">確認投票給 ${escHtml(target?.nickname||'?')}</button>
+      <p style="text-align:center;font-size:0.78rem;color:var(--text3);margin-top:8px;">${t('can_reselect')}</p>
+    </div>`;
+  } else if (confirmed) {
+    confirmHtml = `<div style="margin-top:16px;text-align:center;">
+      <span class="badge badge-success" style="font-size:0.85rem;padding:8px 16px;">${t('vote_confirmed')}</span>
+    </div>`;
+  }
+
+  let confirmEl = document.getElementById('vote-confirm-area');
+  if (!confirmEl) {
+    confirmEl = document.createElement('div');
+    confirmEl.id = 'vote-confirm-area';
+    list.parentNode.insertBefore(confirmEl, list.nextSibling);
+  }
+  confirmEl.innerHTML = confirmHtml;
+
+  document.getElementById('vote-status').textContent = `${votedCount} / ${activePlayers.length} ${t('voted_count')}`;
+  hostActions.classList.toggle('hidden', myId !== room.hostId || !allVoted);
+}
+
+function selectVote(targetId) {
+  // Just update local selection, don't write to room yet
+  if (targetId === myId) return; // can't vote self
+  const room = getRoom(currentRoomCode);
+  const me = room.players.find(p => p.id === myId);
+  if (!me || me.voted || isHostMC) return;
+  myVote = targetId;
+  updateVoteView(room); // re-render to show selection + confirm button
+}
+
+function confirmVote() {
+  if (!myVote) return;
+  const room = getRoom(currentRoomCode);
+  const me = room.players.find(p => p.id === myId);
+  if (!me || me.voted || isHostMC) return;
+  me.voted = true;
+  me.voteTarget = myVote;
+  room.votes[myId] = myVote;
+  saveRoom(room);
+  toast(t('toast_vote_confirmed'));
+}
+
+function hostRevealVotes() {
+  clearVoteTimer();
+  const room = getRoom(currentRoomCode);
+  const activePlayers = room.players.filter(p => !p.isHostMC && p.alive);
+  const tally = {};
+  activePlayers.forEach(p => { if (p.voteTarget) tally[p.voteTarget] = (tally[p.voteTarget]||0)+1; });
+
+  if (Object.keys(tally).length === 0) { toast('沒有有效投票'); return; }
+
+  const maxVotes = Math.max(...Object.values(tally));
+  const topIds = Object.entries(tally).filter(([,c]) => c === maxVotes).map(([id]) => id);
+
+  // TIE — more than one player with same top votes
+  if (topIds.length > 1) {
+    room.status = 'speaking'; // re-enter speaking for tiebreak
+    room.tiebreakIds = topIds;
+    room.speakOrder = topIds; // only tied players speak
+    room.currentSpeakerIdx = 0;
+    room.votes = {};
+    room.voteTimerStart = null;
+    room.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+    room.timerStart = Date.now();
+    const names = topIds.map(id => room.players.find(p=>p.id===id)?.nickname || '?').join('、');
+    room.speeches.push({ type: 'system', text: t('tie_message').replace('{names}', names) });
+    myVote = null;
+    saveRoom(room);
+    return;
+  }
+
+  const eliminated = topIds[0];
+  const eliminatedPlayer = room.players.find(p => p.id === eliminated);
+  eliminatedPlayer.alive = false;
+  room.eliminatedHistory.push({ round: room.round, playerId: eliminated, role: eliminatedPlayer.role, votes: maxVotes });
+  room.tiebreakIds = null;
+
+  if (eliminatedPlayer.role === 'white') {
+    room.status = 'result';
+    room.pendingWhiteGuess = eliminated;
+    saveRoom(room);
+    return;
+  }
+
+  const winner = checkWinCondition(room);
+  if (winner) {
+    room.winner = winner;
+    room.status = 'gameover';
+  } else {
+    room.status = 'result';
+    room.pendingWhiteGuess = null;
+  }
+  saveRoom(room);
+}
+
+function checkWinCondition(room) {
+  const alive = room.players.filter(p => !p.isHostMC && p.alive);
+  const civilians = alive.filter(p => p.role === 'civilian');
+  const undercovers = alive.filter(p => p.role === 'undercover');
+  const whites = alive.filter(p => p.role === 'white');
+
+  if (undercovers.length === 0 && whites.length === 0) return 'civilian';
+  if (undercovers.length >= civilians.length) return 'undercover';
+  return null;
+}
+
+// ══════════════════════════════════════════
+// RESULT VIEW
+// ══════════════════════════════════════════
+function renderResultView(room) {
+  const lastElim = room.eliminatedHistory[room.eliminatedHistory.length - 1];
+  const elimPlayer = lastElim ? room.players.find(p => p.id === lastElim.playerId) : null;
+  const { emoji } = elimPlayer ? getAvatar(elimPlayer.nickname) : { emoji:'❓' };
+  const elimColor = elimPlayer ? getAvatarColor(elimPlayer.id) : '#333';
+
+  const isWhite = elimPlayer?.role === 'white';
+  const isHostUser = myId === room.hostId;
+  const isEliminated = elimPlayer?.id === myId;
+
+  let html = `<div class="anim-pop" style="text-align:center;margin-bottom:24px;">
+    <div class="avatar avatar-xl" style="background:${elimColor};margin:0 auto 16px;">${emoji}</div>
+    <div style="font-size:1.4rem;font-weight:900;margin-bottom:8px;">${escHtml(elimPlayer?.nickname||'?')} ${t('eliminated')}</div>
+    <div style="font-size:0.9rem;color:var(--text2);">${t('highest_votes')}</div>
+  </div>`;
+
+  if (isWhite && isEliminated) {
+    html += `<div class="card" style="text-align:center;margin-bottom:16px;">
+      <p style="margin-bottom:12px;">${t('white_card_guess_prompt')}</p>
+      <input class="input mb-12" id="white-guess-input-inline" placeholder="${t('white_guess_input_placeholder')}">
+      <button class="btn btn-primary btn-full" onclick="submitWhiteGuessInline()">${t('btn_submit_guess')}</button>
+    </div>`;
+  } else if (isWhite && isHostUser) {
+    html += `<div class="card" style="text-align:center;margin-bottom:16px;">
+      <p class="text-muted text-sm">${t('waiting_white_guess')}</p>
+    </div>`;
+  }
+
+  document.getElementById('result-content').innerHTML = html;
+
+  const hostActions = document.getElementById('result-host-actions');
+  hostActions.classList.toggle('hidden', !isHostUser || isWhite);
+}
+
+function submitWhiteGuessInline() {
+  const guess = document.getElementById('white-guess-input-inline')?.value.trim();
+  if (!guess) return;
+  processWhiteGuess(guess);
+}
+
+function submitWhiteGuess() {
+  const guess = document.getElementById('white-guess-input').value.trim();
+  if (!guess) return;
+  processWhiteGuess(guess);
+  closeModal('modal-white-guess');
+}
+
+function processWhiteGuess(guess) {
+  const room = getRoom(currentRoomCode);
+  const civilianWord = room.wordPair?.[0] || '';
+  if (guess.trim() === civilianWord.trim()) {
+    room.winner = 'white';
+    room.status = 'gameover';
+    toast(t('toast_white_win'));
+  } else {
+    room.pendingWhiteGuess = null;
+    const winner = checkWinCondition(room);
+    if (winner) {
+      room.winner = winner;
+      room.status = 'gameover';
+    } else {
+      room.status = 'result';
+    }
+    toast(t('toast_white_wrong'));
+  }
+  saveRoom(room);
+}
+
+function hostNextRound() {
+  const room = getRoom(currentRoomCode);
+  room.round++;
+  room.status = 'speaking';
+  // New speak order from alive players
+  const alive = room.players.filter(p => !p.isHostMC && p.alive);
+  room.speakOrder = alive.map(p=>p.id).sort(() => Math.random() - 0.5);
+  room.currentSpeakerIdx = 0;
+  // Preserve speeches — add a round divider marker instead of clearing
+  room.speeches = room.speeches || [];
+  room.speeches.push({ type: 'system', text: t('round_start').replace('{n}', room.round) });
+  room.votes = {};
+  room.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+  room.timerStart = Date.now();
+  room.voteTimerStart = null;
+  myVote = null;
+  clearVoteTimer();
+  saveRoom(room);
+}
+
+function hostEndGame() {
+  const room = getRoom(currentRoomCode);
+  room.winner = 'none';
+  room.status = 'gameover';
+  saveRoom(room);
+}
+
+function roleLabel(role) {
+  if (role === 'civilian') return t('role_civilian');
+  if (role === 'undercover') return t('role_undercover');
+  if (role === 'white') return t('role_white');
+  return t('role_unknown');
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════
+// GAME OVER VIEW
+// ══════════════════════════════════════════
+function renderGameOver(room) {
+  clearSpeakTimer();
+  const winnerMap = {
+    civilian: { emoji: '🎉', title: t('win_civilian'), color: 'var(--success)', sub: t('win_civilian_sub') },
+    undercover: { emoji: '🕵️', title: t('win_undercover'), color: 'var(--danger)', sub: t('win_undercover_sub') },
+    white: { emoji: '🃏', title: t('win_white'), color: 'var(--warn)', sub: t('win_white_sub') },
+    none: { emoji: '🏳️', title: t('game_over'), color: 'var(--text2)', sub: '' }
+  };
+  const w = winnerMap[room.winner] || winnerMap.none;
+
+  document.getElementById('gameover-content').innerHTML = `
+    <div class="anim-pop" style="padding:32px 0;">
+      <div style="font-size:4rem;margin-bottom:12px;">${w.emoji}</div>
+      <div style="font-size:2rem;font-weight:900;color:${w.color};margin-bottom:8px;">${w.title}</div>
+      <p class="text-muted">${w.sub}</p>
+      ${room.wordPair ? `<div style="margin-top:16px;padding:12px 20px;background:var(--surface2);border-radius:12px;display:inline-block;">
+        <span style="color:var(--success);">${t('civilian_word_prefix')}${escHtml(room.wordPair[0])}</span>
+        <span style="margin:0 12px;color:var(--text3);">vs</span>
+        <span style="color:var(--danger);">${t('undercover_word_prefix')}${escHtml(room.wordPair[1])}</span>
+      </div>` : ''}
+    </div>`;
+
+  const playerList = document.getElementById('gameover-players');
+  playerList.innerHTML = room.players.filter(p => !p.isHostMC).map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    const avatarBg = getAvatarColor(p.id);
+    const roleColors = { civilian: 'var(--success)', undercover: 'var(--danger)', white: 'var(--warn)' };
+    return `<div class="player-chip" style="margin-bottom:10px;">
+      <div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}</div>
+      <div style="flex:1;">
+        <div class="font-bold">${escHtml(p.nickname)}</div>
+        <div class="text-xs" style="color:${roleColors[p.role]||'var(--text3)'};">${roleLabel(p.role)} · ${p.word||'白卡'}</div>
+      </div>
+      ${!p.alive ? `<span class="badge badge-danger">${t('badge_eliminated')}</span>` : `<span class="badge badge-success">${t('badge_alive')}</span>`}
+    </div>`;
+  }).join('');
+
+  // Show host actions or waiting message
+  const isHostUser = myId === room.hostId;
+  document.getElementById('gameover-host-actions').style.display = isHostUser ? 'block' : 'none';
+  document.getElementById('gameover-wait-msg').style.display = isHostUser ? 'none' : 'block';
+}
+
+function backToHome() {
+  if (currentRoomCode) {
+    const room = getRoom(currentRoomCode);
+    if (room) {
+      // If leaving as host and others remain, transfer host first
+      if (myId === room.hostId) {
+        const others = room.players.filter(p => p.id !== myId);
+        if (others.length > 0) {
+          const newHost = others.find(p => p.online) || others[0];
+          // In host-mode the new host becomes MC; in auto mode just becomes regular host
+          newHost.isHostMC = room.mode === 'host';
+          newHost.ready = true;
+          room.hostId = newHost.id;
+        }
+      }
+      room.players = room.players.filter(p => p.id !== myId);
+      if (room.players.length === 0) {
+        db.ref(getRoomKey(currentRoomCode)).remove().catch(err => {
+          console.error('刪除房間失敗:', err);
+        });
+      } else {
+        saveRoom(room).catch(err => {
+          console.error('保存房間失敗:', err);
+        });
+      }
+    }
+  }
+  storeRemove('my_session');
+  currentRoomCode = null; myId = null; myNickname = null;
+  isHost = false; isHostMC = false; myVote = null;
+  if (pollInterval) clearInterval(pollInterval);
+  clearSpeakTimer(); clearVoteTimer();
+  hideSpeechPopup();
+  showView('view-home');
+}
+
+function hostPlayAgain() {
+  const room = getRoom(currentRoomCode);
+  if (!room) return;
+  // Reset all players to alive, clear roles/words, clear game state
+  room.players.forEach(p => {
+    p.alive = true;
+    p.role = null;
+    p.word = null;
+    p.voted = false;
+    p.voteTarget = null;
+    p.identityConfirmed = false;
+    p.ready = (p.id === room.hostId); // host auto-ready, others must re-ready
+    // Preserve isHostMC only for the current host in host mode
+    if (p.id !== room.hostId) p.isHostMC = false;
+  });
+  room.status = 'waiting';
+  room.round = 0;
+  room.speakOrder = [];
+  room.currentSpeakerIdx = 0;
+  room.speeches = [];
+  room.votes = {};
+  room.eliminatedHistory = [];
+  room.winner = null;
+  room.wordPair = null;
+  room.timerStart = null;
+  room.voteTimerStart = null;
+  room.tiebreakIds = null;
+  room.pendingWhiteGuess = null;
+  // Reset local state
+  myVote = null;
+  lastChatCount = room.chat ? room.chat.length : 0; // don't re-render old chat
+  clearSpeakTimer(); clearVoteTimer();
+  hideSpeechPopup();
+  // Clear speech log DOM
+  const log = document.getElementById('speech-log');
+  if (log) log.innerHTML = '';
+  saveRoom(room);
+  toast(t('toast_room_reset'));
+}
+
+// ══════════════════════════════════════════
+// HOST MC VIEW
+// ══════════════════════════════════════════
+function renderHostMC(room) {
+  const phaseMap = {
+    waiting: t('phase_waiting'),
+    identity: t('phase_identity'),
+    speaking: t('phase_speaking'),
+    vote: t('phase_vote'),
+    result: t('phase_result'),
+    gameover: t('phase_gameover')
+  };
+  document.getElementById('mc-phase').textContent = phaseMap[room.status] || room.status;
+
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  const list = document.getElementById('mc-player-list');
+
+  if (room.status === 'identity') {
+    // Show each player's identity + whether they've confirmed
+    list.innerHTML = activePlayers.map(p => {
+      const { emoji } = getAvatar(p.nickname);
+      const avatarBg = getAvatarColor(p.id);
+      const roleColors = { civilian: 'var(--success)', undercover: 'var(--danger)', white: 'var(--warn)' };
+      const confirmed = p.identityConfirmed;
+      return `<div class="player-chip" style="margin-bottom:10px;">
+        <div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}${p.online?'<span class="online-dot"></span>':'<span class="offline-dot"></span>'}</div>
+        <div style="flex:1;">
+          <div class="font-bold">${escHtml(p.nickname)}</div>
+          <div class="text-xs" style="color:${roleColors[p.role]||'var(--text3)'};">${roleLabel(p.role)} · ${p.word||'白卡'}</div>
+        </div>
+        ${confirmed
+          ? `<span class="badge badge-success" style="font-size:0.7rem;">${t('mc_confirmed')}</span>`
+          : `<span class="badge badge-gray" style="font-size:0.7rem;">${t('mc_not_confirmed')}</span>`}
+      </div>`;
+    }).join('');
+
+    const confirmedCount = activePlayers.filter(p => p.identityConfirmed).length;
+    const allConfirmed = confirmedCount === activePlayers.length;
+    const actions = document.getElementById('mc-actions');
+    actions.innerHTML = `
+      <p class="text-sm text-muted mb-12">${confirmedCount} / ${activePlayers.length} ${t('mc_confirmed_count')}</p>
+      <button class="btn btn-primary btn-full" onclick="mcStartSpeaking()" ${allConfirmed ? '' : 'disabled'}>
+        ${t('btn_start_speaking')}
+      </button>
+      <button class="btn btn-danger btn-full mt-8" onclick="confirmForceEnd()">${t('btn_force_end')}</button>`;
+    return;
+  }
+
+  // Other phases — show role + alive status
+  list.innerHTML = activePlayers.map(p => {
+    const { emoji } = getAvatar(p.nickname);
+    const avatarBg = getAvatarColor(p.id);
+    const roleColors = { civilian: 'var(--success)', undercover: 'var(--danger)', white: 'var(--warn)' };
+    return `<div class="player-chip" style="margin-bottom:10px;${!p.alive?'opacity:0.4':''}">
+      <div class="avatar avatar-sm" style="background:${avatarBg};">${emoji}${p.online?'<span class="online-dot"></span>':'<span class="offline-dot"></span>'}</div>
+      <div style="flex:1;">
+        <div class="font-bold">${escHtml(p.nickname)}</div>
+        <div class="text-xs" style="color:${roleColors[p.role]||'var(--text3)'};">${roleLabel(p.role)} · ${p.word||'白卡'}</div>
+      </div>
+      ${!p.alive ? '<span class="badge badge-danger">出局</span>' : ''}
+    </div>`;
+  }).join('');
+
+  const actions = document.getElementById('mc-actions');
+  let btns = '';
+  if (room.status === 'speaking') {
+    btns = `<button class="btn btn-primary btn-full" onclick="mcEndSpeaking()">${t('btn_end_speaking')}</button>`;
+  } else if (room.status === 'vote') {
+    const votedCount = activePlayers.filter(p => p.voted).length;
+    btns = `<button class="btn btn-primary btn-full" onclick="hostRevealVotes()">${t('btn_reveal_votes')} (${votedCount}/${activePlayers.length})</button>`;
+  } else if (room.status === 'result') {
+    btns = `<button class="btn btn-primary btn-full" onclick="hostNextRound()">${t('btn_next_round_mc')}</button>
+            <button class="btn btn-ghost btn-full mt-8" onclick="hostEndGame()">${t('btn_end_game')}</button>`;
+  }
+  btns += `<button class="btn btn-danger btn-full mt-8" onclick="confirmForceEnd()">${t('btn_force_end')}</button>`;
+  actions.innerHTML = btns;
+}
+
+function mcStartSpeaking() {
+  const room = getRoom(currentRoomCode);
+  if (!room || room.status !== 'identity') return;
+  const activePlayers = room.players.filter(p => !p.isHostMC);
+  if (!activePlayers.every(p => p.identityConfirmed)) { toast(t('toast_not_all_ready')); return; }
+  room.status = 'speaking';
+  room.timerStart = Date.now();
+  saveRoom(room);
+}
+
+function mcEndSpeaking() {
+  const room = getRoom(currentRoomCode);
+  room.status = 'vote';
+  room.votes = {};
+  room.voteTimerStart = Date.now();
+  room.players.forEach(p => { p.voted = false; p.voteTarget = null; });
+  clearSpeakTimer();
+  saveRoom(room);
+}
+
+// ══════════════════════════════════════════
+// LEAVE / FORCE END
+// ══════════════════════════════════════════
+function confirmLeave() { showModal('modal-leave'); }
+function confirmForceEnd() { showModal('modal-force-end'); closeModal('modal-leave'); }
+
+function leaveRoom() {
+  closeModal('modal-leave');
+  backToHome();
+}
+
+function forceEndGame() {
+  closeModal('modal-force-end');
+  const room = getRoom(currentRoomCode);
+  if (room) { room.winner = 'none'; room.status = 'gameover'; saveRoom(room); }
+  // Host goes back to home immediately
+  backToHome();
+}
+
+// ══════════════════════════════════════════
+// CHAT — INLINE STREAM
+// ══════════════════════════════════════════
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !currentRoomCode) return;
+  const room = getRoom(currentRoomCode);
+  if (!room) return;
+  room.chat = room.chat || [];
+  room.chat.push({ id: genId(), senderId: myId, senderName: myNickname, text, ts: Date.now() });
+  if (room.chat.length > 200) room.chat = room.chat.slice(-200);
+  saveRoom(room);
+  input.value = '';
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChat();
+});
+
+function updateChatMessages(room) {
+  const msgs = room.chat || [];
+  if (msgs.length === lastChatCount) return;
+  const newMsgs = msgs.slice(lastChatCount);
+  lastChatCount = msgs.length;
+
+  const stream = document.getElementById('chat-stream');
+  if (!stream) return;
+
+  newMsgs.forEach(msg => {
+    if (msg.senderId === 'system') return;
+    const isMe = msg.senderId === myId;
+    const senderPlayer = room.players.find(p => p.id === msg.senderId);
+    const isMC = senderPlayer?.isHostMC;
+    const line = document.createElement('div');
+    line.className = 'chat-line';
+    const nameColor = isMe ? 'var(--success)' : 'var(--accent2)';
+    const mcTag = isMC ? ' <span style="font-size:0.65rem;background:rgba(245,158,11,0.2);color:var(--warn);padding:1px 5px;border-radius:4px;font-weight:700;">MC</span>' : '';
+    line.innerHTML = `<span class="cl-name" style="color:${nameColor};">${escHtml(msg.senderName)}${mcTag}</span><span class="cl-text">${escHtml(msg.text)}</span>`;
+    stream.appendChild(line);
+  });
+  // Scroll to bottom to show latest
+  stream.scrollTop = stream.scrollHeight;
+}
+
+// Stubs for removed features (called from backToHome etc.)
+function closeChatPanel() {}
+function toggleChat() {}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
